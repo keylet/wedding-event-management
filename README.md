@@ -1,21 +1,21 @@
 # Wedding Event Management
 
-Este proyecto es una aplicación de microservicios para gestionar eventos de bodas.
+This project is a microservices application for managing wedding events.
 
-## Microservicios
-- **create-user**: Crear un nuevo usuario.
-- **delete-user**: Eliminar un usuario existente.
-- **update-user**: Actualizar un usuario.
-- **login-logout**: Iniciar y cerrar sesión.
-- **user-profile**: Ver los perfiles de los usuarios.
+## Microservices
+- **create-user**: Create a new user.
+- **delete-user**: Delete an existing user.
+- **update-user**: Update a user.
+- **login-logout**: Log in and log out.
+- **user-profile**: View user profiles.
 
-## Tecnologías
-- **Node.js** para los microservicios.
-- **PostgreSQL** para la base de datos.
-- **Docker** para contenerización.
-- **GitHub Actions** para CI/CD.
+## Technologies
+- **Node.js** for microservices.
+- **PostgreSQL** for the database.
+- **Docker** for containerization.
+- **GitHub Actions** for CI/CD.
 
-
-1. Clona el repositorio.
-2. Ejecuta `docker-compose up --build` para iniciar los servicios.
-3. Accede a los servicios en `http://localhost:3001/create-user`, `http://localhost:3002/delete-user`.
+## Steps to Run
+1. Clone the repository.
+2. Run `docker-compose up --build` to start the services.
+3. Access the services at `http://localhost:3001/create-user`, `http://localhost:3002/delete-user`.
