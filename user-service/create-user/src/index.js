@@ -14,6 +14,11 @@ const pool = new Pool({
   port: 5432,
 });
 
+// Agregar un manejador para GET en la raíz
+app.get('/', (req, res) => {
+  res.send('Create User Service is running. Use POST /create-user to create users.');
+});
+
 // Endpoint para crear un nuevo usuario (requiere una solicitud POST)
 app.post('/create-user', async (req, res) => {
   const { username, email, password } = req.body; // Recibe los datos desde el cuerpo de la solicitud

@@ -1,6 +1,5 @@
-version: '3.8'
-
 services:
+  # Servicio de base de datos PostgreSQL
   db:
     image: postgres:latest
     environment:
@@ -12,20 +11,38 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
 
+
+  # Interfaz de administración pgAdmin
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5051:80"
+    depends_on:
+      - db
+
+
+  # Microservicio para crear usuarios
   create-user:
-    image: keylet30/wedding-event-management:create-user-latest  
+    image: keylet30/wedding-event-management:create-user-latest
     ports:
       - "3001:3001"
     depends_on:
       - db
 
-  user-profile:
-    image: keylet30/wedding-event-management:user-profile-latest
+
+  # Microservicio para actualizar usuarios
+  update-user:
+    image: keylet30/wedding-event-management:update-user-latest
     ports:
       - "3002:3002"
     depends_on:
       - db
 
+
+  # Microservicio para eliminar usuarios
   delete-user:
     image: keylet30/wedding-event-management:delete-user-latest
     ports:
@@ -33,15 +50,19 @@ services:
     depends_on:
       - db
 
-  login-logout:
-    image: keylet30/wedding-event-management:login-logout-latest
+
+  # Microservicio para gestionar perfiles de usuarios
+  user-profile:
+    image: keylet30/wedding-event-management:user-profile-latest
     ports:
       - "3004:3004"
     depends_on:
       - db
 
-  update-user:
-    image: keylet30/wedding-event-management:update-user-latest
+
+  # Microservicio para iniciar y cerrar sesión
+  login-logout:
+    image: keylet30/wedding-event-management:login-logout-latest
     ports:
       - "3005:3005"
     depends_on:
@@ -49,3 +70,6 @@ services:
 
 volumes:
   pg_data:
+
+
+
