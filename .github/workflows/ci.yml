@@ -1,64 +1,48 @@
-name: CI for QA Environment
+name: Deploy to AWS
 
 on:
   push:
     branches:
-      - qa   # Solo ejecuta cuando se hace push en la rama 'qa'
-  pull_request:
-    branches:
-      - prod # Ejecuta cuando se hace un pull request hacia la rama 'prod'
+      - main
 
 jobs:
-  test:
-    runs-on: ubuntu-latest  # Utiliza la última versión de Ubuntu para correr los trabajos
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2  # Clona tu repositorio
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1  # Configura Buildx para poder usar Docker en múltiples plataformas
-
-      - name: Log in to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@v1  # Inicia sesión en Amazon ECR para poder enviar las imágenes
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}  # Reemplaza con tu acceso
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}  # Reemplaza con tu clave secreta
-          aws-region: ${{ secrets.AWS_REGION }}  # Usando la región configurada en tus secretos
-
-      - name: Build and push Docker image
-        run: |
-          # Construye la imagen Docker
-          docker build -t ${{ secrets.ECR_REPOSITORY_NAME }} .
-          # Empuja la imagen al repositorio ECR
-          docker push ${{ secrets.ECR_REPOSITORY_NAME }}
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v2  # Configura el entorno Node.js
-        with:
-          node-version: '14'  # Define la versión de Node.js a usar
-
-      - name: Install dependencies
-        run: |
-          # Instala las dependencias de tu proyecto (por ejemplo, si usas npm o yarn)
-          npm install  # Cambia esto si utilizas otro gestor de paquetes como yarn
-
-      - name: Run tests
-        run: |
-          # Si tienes pruebas, puedes agregarlas aquí (por ejemplo, si usas jest)
-          npm test  # Cambia esto si utilizas otro framework de pruebas
+  build:
+    runs-on: ubuntu-latest
 
     services:
       postgres:
-        image: postgres:latest  # Usa la imagen más reciente de PostgreSQL
-        env:
-          POSTGRES_USER: admin
-          POSTGRES_PASSWORD: admin123
-          POSTGRES_DB: wedding_event_management
-        ports:
-          - 5432:5432  # Mapea el puerto 5432 para que sea accesible
+        image: postgres:13
         options: >-
-          --health-cmd="pg_isready -U admin -d wedding_event_management"  # Comando para verificar si PostgreSQL está listo
-          --health-timeout=30s  # Timeout para el chequeo de salud
-          --health-start-period=5s  # Tiempo de espera antes de iniciar el chequeo de salud
-          --health-retries=5  # Número de intentos antes de marcar el servicio como no saludable
+          --health-cmd="pg_isready -U admin -d wedding_event_management"
+          --health-timeout=30s
+          --health-start-period=5s
+          --health-retries=5
+          -e POSTGRES_USER=admin
+          -e POSTGRES_PASSWORD=admin123
+          -e POSTGRES_DB=wedding_event_management
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Log in to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build and push Docker image for create-user
+        run: |
+          docker build -t <aws_account_id>.dkr.ecr.<region>.amazonaws.com/wedding-event-management:create-user-latest .
+          docker push <aws_account_id>.dkr.ecr.<region>.amazonaws.com/wedding-event-management:create-user-latest
+
+      - name: Build and push Docker image for update-user
+        run: |
+          docker build -t <aws_account_id>.dkr.ecr.<region>.amazonaws.com/wedding-event-management:update-user-latest .
+          docker push <aws_account_id>.dkr.ecr.<region>.amazonaws.com/wedding-event-management:update-user-latest
+
+      - name: Build and push Docker image for login-logout
+        run: |
+          docker
