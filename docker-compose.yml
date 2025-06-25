@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: wedding_event_management
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  create-user:
+    image: keylet30/wedding-event-management:create-user-latest  
+    ports:
+      - "3001:3001"
+    depends_on:
+      - db
+
+  user-profile:
+    image: keylet30/wedding-event-management:user-profile-latest
+    ports:
+      - "3002:3002"
+    depends_on:
+      - db
+
+  delete-user:
+    image: keylet30/wedding-event-management:delete-user-latest
+    ports:
+      - "3003:3003"
+    depends_on:
+      - db
+
+  login-logout:
+    image: keylet30/wedding-event-management:login-logout-latest
+    ports:
+      - "3004:3004"
+    depends_on:
+      - db
+
+  update-user:
+    image: keylet30/wedding-event-management:update-user-latest
+    ports:
+      - "3005:3005"
+    depends_on:
+      - db
+
+volumes:
+  pg_data:

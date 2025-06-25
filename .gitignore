@@ -3,10 +3,6 @@ node_modules/
 npm-debug.log
 .env
 
-# Docker
-docker-compose.yml
-.docker/
-
 # OS-specific files
 .DS_Store
 Thumbs.db
