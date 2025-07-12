@@ -1,3 +1,4 @@
+
 name: CI/CD Deployment for Delete User Service
 
 on:
@@ -12,29 +13,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Paso 1: Clonar el repositorio
     - name: Checkout code
       uses: actions/checkout@v3
 
-    # Paso 2: Configurar Node.js (si tu proyecto lo requiere)
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
         node-version: '16'
 
-    # Paso 3: Instalar dependencias
     - name: Install dependencies
       run: npm install
       working-directory: ./Users/delete-user-service
 
-    # Paso 4: Construir la imagen Docker y hacer push
     - name: Build and push Docker image for delete-user-service
       run: |
         docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/delete-user-service:latest ./Users/delete-user-service
         docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PASSWORD }}
         docker push ${{ secrets.DOCKER_HUB_USERNAME }}/delete-user-service:latest
 
-    # Paso 5: Desplegar en EC2 con Docker Compose
     - name: Deploy delete-user-service to EC2 with Docker Compose
       uses: appleboy/ssh-action@v0.1.8
       with:
@@ -43,22 +39,16 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY_M }}
         port: 22
         script: |
-          # Instalar Docker y Docker Compose si no están instalados
           if ! command -v docker &> /dev/null; then
-            echo "Installing Docker"
             sudo apt-get update -y
             sudo apt-get install -y docker.io
             sudo systemctl start docker
             sudo systemctl enable docker
           fi
-          
           if ! command -v docker-compose &> /dev/null; then
-            echo "Installing Docker Compose"
             sudo curl -L "https://github.com/docker/compose/releases/download/v2.15.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
             sudo chmod +x /usr/local/bin/docker-compose
           fi
-
-          # Crear el archivo docker-compose.yml dinámicamente para este servicio
           cat > docker-compose.yml <<EOF
           version: '3.8'
           services:
@@ -67,7 +57,5 @@ jobs:
               ports:
                 - "3001:3001"
           EOF
-
-          # Detener contenedores antiguos y iniciar los nuevos
           sudo docker-compose down || true
           sudo docker-compose up -d
