@@ -1,0 +1,11 @@
+type Decoration {
+    id_decoration: ID
+    name: String
+    price: Float
+}
+
+type Query {
+    getAllDecoration: [Decoration]
+    getDecorationById(id_decoration: ID!): Decoration
+    searchDecorationByName(name: String!): [Decoration]
+}

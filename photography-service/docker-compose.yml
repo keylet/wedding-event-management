@@ -1,0 +1,105 @@
+version: '3.8'
+services:
+  create-photography:
+    build: 
+      context: ./create-photography
+
+    image: create-photography-service
+
+    container_name: create-photography-service
+
+    env_file:
+      - ./create-photography/.env
+      
+    environment:
+      SERVER_PORT: ${SERVER_PORT}
+      SPRING_APPLICATION_NAME: ${SPRING_APPLICATION_NAME}
+      EUREKA_CLIENT_SERVICE_URL: ${EUREKA_CLIENT_SERVICE_URL}
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_JPA_DATABASE_PLATFORM: ${SPRING_JPA_DATABASE_PLATFORM}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO}
+    ports:
+      - "8051:8051"
+    networks:
+      - photography-network
+
+  read-photography:
+    build: 
+      context: ./read-photography
+
+    image: read-photography-service
+
+    container_name: read-photography-service
+
+    env_file:
+      - ./read-photography/.env
+      
+    environment:
+      SERVER_PORT: ${SERVER_PORT}
+      SPRING_APPLICATION_NAME: ${SPRING_APPLICATION_NAME}
+      EUREKA_CLIENT_SERVICE_URL: ${EUREKA_CLIENT_SERVICE_URL}
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_JPA_DATABASE_PLATFORM: ${SPRING_JPA_DATABASE_PLATFORM}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO}
+    ports:
+      - "8052:8052"
+    networks:
+      - photography-network
+
+  update-photography:
+    build: 
+      context: ./update-photography
+
+    image: update-photography-service
+
+    container_name: update-photography-service
+
+    env_file:
+      - ./update-photography/.env
+      
+    environment:
+      SERVER_PORT: ${SERVER_PORT}
+      SPRING_APPLICATION_NAME: ${SPRING_APPLICATION_NAME}
+      EUREKA_CLIENT_SERVICE_URL: ${EUREKA_CLIENT_SERVICE_URL}
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_JPA_DATABASE_PLATFORM: ${SPRING_JPA_DATABASE_PLATFORM}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO}
+    ports:
+      - "8053:8053"
+    networks:
+      - photography-network
+
+
+  delete-photography:
+    build: 
+      context: ./delete-photography
+
+    image: delete-photography-service
+
+    container_name: delete-photography-service
+
+    env_file:
+      - ./delete-photography/.env
+      
+    environment:
+      SERVER_PORT: ${SERVER_PORT}
+      SPRING_APPLICATION_NAME: ${SPRING_APPLICATION_NAME}
+      EUREKA_CLIENT_SERVICE_URL: ${EUREKA_CLIENT_SERVICE_URL}
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_JPA_DATABASE_PLATFORM: ${SPRING_JPA_DATABASE_PLATFORM}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO}
+    ports:
+      - "8054:8054"
+    networks:
+      - photography-network
+
+networks:
+  photography-network:

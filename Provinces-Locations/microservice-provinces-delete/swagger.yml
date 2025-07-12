@@ -1,0 +1,92 @@
+openapi: 3.0.0
+info:
+  title: Microservice Provinces Delete API
+  version: 1.0.0
+  description: API for deleting provinces using GraphQL mutations.
+servers:
+  - url: http://localhost:8000
+paths:
+  /graphql:
+    post:
+      summary: Execute GraphQL mutations
+      description: Performs a mutation to delete a province by its ID.
+      parameters:
+        - in: header
+          name: Authorization
+          required: false
+          schema:
+            type: string
+          description: Bearer token for authentication (if required)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  type: string
+                  description: GraphQL mutation string
+                  example: |
+                    mutation { 
+                      deleteProvince(province_id: 5) 
+                    }
+      responses:
+        '200':
+          description: Province successfully deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      deleteProvince:
+                        type: string
+                        example: "Province deleted successfully"
+        '400':
+          description: Bad request, check input data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: "Invalid province ID"
+        '401':
+          description: Unauthorized, authentication required
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: "Authentication required"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: "Database error occurred"

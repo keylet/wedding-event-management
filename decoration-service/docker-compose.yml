@@ -1,0 +1,105 @@
+version: '3.8'
+services:
+  create-decoration:
+    build: 
+      context: ./create-decoration
+
+    image: create-decoration-service
+
+    container_name: create-decoration-service
+
+    env_file:
+      - ./create-decoration/.env
+      
+    environment:
+      SERVER_PORT: ${SERVER_PORT}
+      SPRING_APPLICATION_NAME: ${SPRING_APPLICATION_NAME}
+      EUREKA_CLIENT_SERVICE_URL: ${EUREKA_CLIENT_SERVICE_URL}
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_JPA_DATABASE_PLATFORM: ${SPRING_JPA_DATABASE_PLATFORM}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO}
+    ports:
+      - "8041:8041"
+    networks:
+      - decoration-network
+
+  read-decoration:
+    build: 
+      context: ./read-decoration
+
+    image: read-decoration-service
+
+    container_name: read-decoration-service
+
+    env_file:
+      - ./read-decoration/.env
+      
+    environment:
+      SERVER_PORT: ${SERVER_PORT}
+      SPRING_APPLICATION_NAME: ${SPRING_APPLICATION_NAME}
+      EUREKA_CLIENT_SERVICE_URL: ${EUREKA_CLIENT_SERVICE_URL}
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_JPA_DATABASE_PLATFORM: ${SPRING_JPA_DATABASE_PLATFORM}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO}
+    ports:
+      - "8042:8042"
+    networks:
+      - decoration-network
+
+  update-decoration:
+    build: 
+      context: ./update-decoration
+
+    image: update-decoration-service
+
+    container_name: update-decoration-service
+
+    env_file:
+      - ./update-decoration/.env
+      
+    environment:
+      SERVER_PORT: ${SERVER_PORT}
+      SPRING_APPLICATION_NAME: ${SPRING_APPLICATION_NAME}
+      EUREKA_CLIENT_SERVICE_URL: ${EUREKA_CLIENT_SERVICE_URL}
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_JPA_DATABASE_PLATFORM: ${SPRING_JPA_DATABASE_PLATFORM}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO}
+    ports:
+      - "8043:8043"
+    networks:
+      - decoration-network
+
+
+  delete-decoration:
+    build: 
+      context: ./delete-decoration
+
+    image: delete-decoration-service
+
+    container_name: delete-decoration-service
+
+    env_file:
+      - ./delete-decoration/.env
+      
+    environment:
+      SERVER_PORT: ${SERVER_PORT}
+      SPRING_APPLICATION_NAME: ${SPRING_APPLICATION_NAME}
+      EUREKA_CLIENT_SERVICE_URL: ${EUREKA_CLIENT_SERVICE_URL}
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_JPA_DATABASE_PLATFORM: ${SPRING_JPA_DATABASE_PLATFORM}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO} 
+    ports:
+      - "8044:8044"
+    networks:
+      - decoration-network
+
+networks:
+  decoration-network:

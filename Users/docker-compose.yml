@@ -1,0 +1,87 @@
+version: "3.9"
+
+services:
+  # MySQL Database for Users
+  mysql-db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}   # Contraseña del root
+      MYSQL_DATABASE: ${DB_NAME}            # Nombre de la base de datos por defecto
+      MYSQL_USER: ${DB_USER}                # Usuario para la base de datos
+      MYSQL_PASSWORD: ${DB_PASSWORD}        # Contraseña para el usuario
+    ports:
+      - "3306:3306"     # Exponemos el puerto 3306 para acceso externo
+    volumes:
+      - mysql-data:/var/lib/mysql    # Volumen persistente para los datos
+    networks:
+      - user-network
+
+  # phpMyAdmin - Herramienta web para gestionar bases de datos
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: mysql-db         # El contenedor MySQL
+      PMA_PORT: 3306            # Puerto en el que MySQL está corriendo
+    ports:
+      - "8081:80"               # Accede a phpMyAdmin en http://localhost:8081
+    networks:
+      - user-network
+
+  # Microservicio de Registro de Usuario
+  user-registration-service:
+    build: ./user-registration-service
+    ports:
+      - "3006:3006"
+    networks:
+      - user-network
+    env_file:
+      - .env
+
+  # Microservicio de Obtener Usuario
+  get-user-service:
+    build: ./get-user-service
+    ports:
+      - "3001:3001"
+    networks:
+      - user-network
+    env_file:
+      - .env
+
+  # Microservicio de Eliminar Usuario
+  delete-user-service:
+    build: ./delete-user-service
+    ports:
+      - "3002:3002"
+    networks:
+      - user-network
+    env_file:
+      - .env
+
+  # Microservicio de Actualizar Usuario
+  update-user-service:
+    build: ./update-user-service
+    ports:
+      - "3003:3003"
+    networks:
+      - user-network
+    env_file:
+      - .env
+
+  # Microservicio de Login
+  login-service:
+    build: ./login-service
+    ports:
+      - "3004:3004"
+    networks:
+      - user-network
+    env_file:
+      - .env
+
+networks:
+  user-network:
+    driver: bridge
+
+volumes:
+  mysql-data:  # Volumen para los datos de MySQL

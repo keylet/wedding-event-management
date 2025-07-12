@@ -1,0 +1,11 @@
+type Music {
+    id_music: ID
+    name: String
+    price: Float
+}
+
+type Query {
+    getAllMusic: [Music]
+    getMusicById(id_music: ID!): Music
+    searchMusicByName(name: String!): [Music]
+}

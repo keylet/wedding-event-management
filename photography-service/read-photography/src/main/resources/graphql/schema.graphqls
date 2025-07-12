@@ -1,0 +1,11 @@
+type Photography {
+    id_photograhy: ID
+    name: String
+    price: Float
+}
+
+type Query {
+    getAllPhotography: [Photography]
+    getPhotographyById(id_photograhy: ID!): Photography
+    searchPhotographyByName(name: String!): [Photography]
+}

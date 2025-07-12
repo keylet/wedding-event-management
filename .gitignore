@@ -1,8 +1,17 @@
-# Node.js
-node_modules/
-npm-debug.log
-.env
-
-# OS-specific files
+# Common files to ignore globally
+*.log
+*.tmp
+*.swp
 .DS_Store
-Thumbs.db
+
+# Ignore all .env files
+*.env
+
+# Ignore build folders
+target/
+build/
+
+# Ignore IDE configurations
+.idea/
+*.iml
+.vscode/

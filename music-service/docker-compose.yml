@@ -1,0 +1,105 @@
+version: '3.8'
+services:
+  create-music:
+    build: 
+      context: ./create-music
+
+    image: create-music-service
+
+    container_name: create-music-service
+
+    env_file:
+      - ./create-music/.env
+      
+    environment:
+      SERVER_PORT: ${SERVER_PORT}
+      SPRING_APPLICATION_NAME: ${SPRING_APPLICATION_NAME}
+      EUREKA_CLIENT_SERVICE_URL: ${EUREKA_CLIENT_SERVICE_URL}
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_JPA_DATABASE_PLATFORM: ${SPRING_JPA_DATABASE_PLATFORM}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO}
+    ports:
+      - "8061:8061"
+    networks:
+      - music-network
+
+  read-music:
+    build: 
+      context: ./read-music
+
+    image: read-music-service
+
+    container_name: read-music-service
+
+    env_file:
+      - ./read-music/.env
+      
+    environment:
+      SERVER_PORT: ${SERVER_PORT}
+      SPRING_APPLICATION_NAME: ${SPRING_APPLICATION_NAME}
+      EUREKA_CLIENT_SERVICE_URL: ${EUREKA_CLIENT_SERVICE_URL}
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_JPA_DATABASE_PLATFORM: ${SPRING_JPA_DATABASE_PLATFORM}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO}
+    ports:
+      - "8062:8062"
+    networks:
+      - music-network
+
+  update-music:
+    build: 
+      context: ./update-music
+
+    image: update-music-service
+
+    container_name: update-music-service
+
+    env_file:
+      - ./update-music/.env
+      
+    environment:
+      SERVER_PORT: ${SERVER_PORT}
+      SPRING_APPLICATION_NAME: ${SPRING_APPLICATION_NAME}
+      EUREKA_CLIENT_SERVICE_URL: ${EUREKA_CLIENT_SERVICE_URL}
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_JPA_DATABASE_PLATFORM: ${SPRING_JPA_DATABASE_PLATFORM}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO}
+    ports:
+      - "8063:8063"
+    networks:
+      - music-network
+
+
+  delete-music:
+    build: 
+      context: ./delete-music
+
+    image: delete-music-service
+
+    container_name: delete-music-service
+
+    env_file:
+      - ./delete-music/.env
+      
+    environment:
+      SERVER_PORT: ${SERVER_PORT}
+      SPRING_APPLICATION_NAME: ${SPRING_APPLICATION_NAME}
+      EUREKA_CLIENT_SERVICE_URL: ${EUREKA_CLIENT_SERVICE_URL}
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_JPA_DATABASE_PLATFORM: ${SPRING_JPA_DATABASE_PLATFORM}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO}
+    ports:
+      - "8064:8064"
+    networks:
+      - music-network
+
+networks:
+  music-network:
