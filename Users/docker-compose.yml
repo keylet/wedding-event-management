@@ -11,7 +11,7 @@ services:
       MYSQL_USER: ${DB_USER}                # Usuario para la base de datos
       MYSQL_PASSWORD: ${DB_PASSWORD}        # Contraseña para el usuario
     ports:
-      - "3306:3306"     # Exponemos el puerto 3306 para acceso externo
+      - "3306:3306"     # Exponemos el puerto 3306 solo para otros servicios dentro de Docker
     volumes:
       - mysql-data:/var/lib/mysql    # Volumen persistente para los datos
     networks:
@@ -22,10 +22,10 @@ services:
     image: phpmyadmin/phpmyadmin
     restart: always
     environment:
-      PMA_HOST: mysql-db         # El contenedor MySQL
+      PMA_HOST: mysql-db         # Conectarse al contenedor mysql-db
       PMA_PORT: 3306            # Puerto en el que MySQL está corriendo
     ports:
-      - "8081:80"               # Accede a phpMyAdmin en http://localhost:8081
+      - "8081:80"         # Accede a phpMyAdmin en http://localhost:8081
     networks:
       - user-network
 
@@ -33,19 +33,19 @@ services:
   user-registration-service:
     build: ./user-registration-service
     ports:
-      - "3006:3006"
+      - "3006:3006"  # Exponemos el puerto 3006 para este microservicio
     networks:
-      - user-network
+      - user-network  # Conectar a la misma red Docker que MySQL
     env_file:
-      - .env
+      - .env  # Asegúrate de que las variables de entorno estén configuradas correctamente
 
   # Microservicio de Obtener Usuario
   get-user-service:
     build: ./get-user-service
     ports:
-      - "3001:3001"
+      - "3001:3001"  # Exponemos el puerto 3001 para este microservicio
     networks:
-      - user-network
+      - user-network  # Conectar a la misma red Docker que MySQL
     env_file:
       - .env
 
@@ -53,9 +53,9 @@ services:
   delete-user-service:
     build: ./delete-user-service
     ports:
-      - "3002:3002"
+      - "3002:3002"  # Exponemos el puerto 3002 para este microservicio
     networks:
-      - user-network
+      - user-network  # Conectar a la misma red Docker que MySQL
     env_file:
       - .env
 
@@ -63,9 +63,9 @@ services:
   update-user-service:
     build: ./update-user-service
     ports:
-      - "3003:3003"
+      - "3003:3003"  # Exponemos el puerto 3003 para este microservicio
     networks:
-      - user-network
+      - user-network  # Conectar a la misma red Docker que MySQL
     env_file:
       - .env
 
@@ -73,9 +73,9 @@ services:
   login-service:
     build: ./login-service
     ports:
-      - "3004:3004"
+      - "3004:3004"  # Exponemos el puerto 3004 para este microservicio
     networks:
-      - user-network
+      - user-network  # Conectar a la misma red Docker que MySQL
     env_file:
       - .env
 

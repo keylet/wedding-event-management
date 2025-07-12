@@ -6,7 +6,7 @@ WORKDIR /usr/src/app
 
 # Copia package.json e instala las dependencias dentro del contenedor
 COPY package*.json ./
-RUN npm install --omit=dev  # Se asegura de instalar dependencias nativas correctamente
+RUN npm install  # Instala todas las dependencias, incluidas las de desarrollo
 
 # Copia el resto del código fuente
 COPY . .
@@ -16,3 +16,4 @@ EXPOSE 3006
 
 # Comando de inicio
 CMD ["node", "src/server.js"]
+

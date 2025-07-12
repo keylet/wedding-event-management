@@ -7,7 +7,7 @@
 This microservice allows registering new users in the system.
 
 ## Endpoint
-- **POST** `http://localhost:3006/api/users`
+- **POST** `http://localhost:3007/api/users`
 
 ## Requirements
 - Node.js
