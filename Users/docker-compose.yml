@@ -85,7 +85,7 @@ services:
     environment:
       PMA_HOST: mysql-db
     ports:
-      - "8081:80"
+      - "80:80"
     networks:
       - users_network
 
