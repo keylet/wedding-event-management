@@ -14,12 +14,6 @@ This project follows a **microservices architecture**, running **27 independent 
 
 ---
 
-## 🎥 Video de Presentación
-Puedes ver la presentación del proyecto en el siguiente enlace:
-[Ver Video](https://uceedu.sharepoint.com/:v:/s/Presentaciones2/EYb5SYSCHI5Igx6gNPkQL9QB6HeWyczvFOosQoKlGxRsVA?e=cOqDkS&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D)
-
----
-
 ## ⚙️ **Technology Stack**
 - **Backend**
   - `Spring Boot` (Java) - Microservices framework.
