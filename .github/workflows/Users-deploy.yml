@@ -1,20 +1,22 @@
-name: Build & deploy to EC2
+# .github/workflows/deploy.yml
+name: Build & Deploy to EC2
 
 on:
   push:
-    branches:
-      - qa
+    branches: [ qa ]
 
 env:
   DOCKERHUB_REPO: keylet30/users-wedding
+  REPO_URL:       https://github.com/keylet/wedding-event-management.git
+  DEPLOY_DIR:     ~/wedding-event-management/Users
 
 jobs:
   build-and-push:
-    name: Build & push Docker images
+    name: 📦 Build & Push Images
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out code
+      - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Log in to Docker Hub
@@ -23,39 +25,38 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # 🚧 Adjust paths below to point at each service/Dockerfile
       - name: Build & push user-registration
         run: |
           docker build -t $DOCKERHUB_REPO:user-registration Users/user-registration-service
           docker push $DOCKERHUB_REPO:user-registration
 
-      - name: Build & push login-service
+      - name: Build & push user-login
         run: |
-          docker build -t $DOCKERHUB_REPO:user-login Users/login-service
+          docker build -t $DOCKERHUB_REPO:user-login Users/user-login-service
           docker push $DOCKERHUB_REPO:user-login
 
-      - name: Build & push get-service
+      - name: Build & push user-get
         run: |
-          docker build -t $DOCKERHUB_REPO:user-get Users/get-user-service
+          docker build -t $DOCKERHUB_REPO:user-get Users/user-get-service
           docker push $DOCKERHUB_REPO:user-get
 
-      - name: Build & push update-service
+      - name: Build & push user-update
         run: |
-          docker build -t $DOCKERHUB_REPO:user-update Users/update-user-service
+          docker build -t $DOCKERHUB_REPO:user-update Users/user-update-service
           docker push $DOCKERHUB_REPO:user-update
 
-      - name: Build & push delete-service
+      - name: Build & push user-delete
         run: |
-          docker build -t $DOCKERHUB_REPO:user-delete Users/delete-user-service
+          docker build -t $DOCKERHUB_REPO:user-delete Users/user-delete-service
           docker push $DOCKERHUB_REPO:user-delete
 
       - name: Build & push frontend
         run: |
-          docker build -t $DOCKERHUB_REPO:frontend Users/frontend
+          docker build -t $DOCKERHUB_REPO:frontend -f Users/frontend/Dockerfile Users/frontend
           docker push $DOCKERHUB_REPO:frontend
 
   deploy:
-    name: SSH & deploy on EC2
+    name: 🚀 SSH & Deploy on EC2
     needs: build-and-push
     runs-on: ubuntu-latest
 
@@ -68,9 +69,21 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-            cd ~/wedding-event-management/Users
+            # Si no existe el directorio, clona el repo en la rama qa
+            if [ ! -d "$(dirname ${DEPLOY_DIR})" ]; then
+              mkdir -p $(dirname ${DEPLOY_DIR})
+            fi
+            if [ ! -d "${DEPLOY_DIR}" ]; then
+              git clone --branch qa $REPO_URL ${DEPLOY_DIR}
+            fi
+
+            cd ${DEPLOY_DIR}
             git fetch origin qa
+            git checkout qa
             git reset --hard origin/qa
+
+            # Levanta el stack con Docker Compose
+            cd ${DEPLOY_DIR}
             docker-compose pull
             docker-compose up -d --build --remove-orphans
           EOF

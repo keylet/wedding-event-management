@@ -1,47 +1,33 @@
-// src/components/CreateUser.js
 import React, { useState } from 'react';
 import axios from 'axios';
+const API = import.meta.env.VITE_API_BASE_URL;
 
-function CreateUser() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+export default function CreateUser({ onCreated }) {
+  const [username, setUsername] = useState('');
+  const [email,    setEmail]    = useState('');
+  const [password, setPassword] = useState('');
+  const [role,     setRole]     = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
-
-    const newUser = { name, email };
-    
-    // Llamada al microservicio user-registration-service
-    axios.post('http://98.80.87.138:3002/users', newUser)
-
-      .then(response => {
-        alert('User created successfully!');
-        setName('');
-        setEmail('');
-      })
-      .catch(error => console.error('Error creating user: ', error));
+    try {
+      await axios.post(`${API}/register`, { username, email, password, role });
+      setUsername(''); setEmail(''); setPassword(''); setRole('');
+      onCreated();
+    } catch (err) {
+      console.error(err);
+      alert('Error creating user');
+    }
   };
 
   return (
-    <div>
+    <form onSubmit={handleSubmit}>
       <h2>Create User</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Name"
-          value={name}
-          onChange={e => setName(e.target.value)}
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-        />
-        <button type="submit">Create</button>
-      </form>
-    </div>
+      <input placeholder="Username" value={username} onChange={e=>setUsername(e.target.value)} required />
+      <input placeholder="Email"    value={email}    onChange={e=>setEmail(e.target.value)}    required />
+      <input placeholder="Password" type="password" value={password} onChange={e=>setPassword(e.target.value)} required />
+      <input placeholder="Role"     value={role}     onChange={e=>setRole(e.target.value)}           required />
+      <button type="submit">Create</button>
+    </form>
   );
 }
-
-export default CreateUser;

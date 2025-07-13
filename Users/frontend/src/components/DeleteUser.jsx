@@ -1,37 +1,28 @@
-// src/components/DeleteUser.js
 import React, { useState } from 'react';
 import axios from 'axios';
+const API = import.meta.env.VITE_API_BASE_URL;
 
-function DeleteUser() {
-  const [userId, setUserId] = useState('');
+export default function DeleteUser({ onDeleted }) {
+  const [id, setId] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
-
-    // Llamada al microservicio delete-user-service
-    axios.delete(`http://98.80.87.138:3005/users/${userId}`)
-
-      .then(response => {
-        alert('User deleted successfully!');
-        setUserId('');
-      })
-      .catch(error => console.error('Error deleting user: ', error));
+    if (!window.confirm(`Delete user #${id}?`)) return;
+    try {
+      await axios.delete(`${API}/users/${encodeURIComponent(id)}`);
+      setId('');
+      onDeleted();
+    } catch (err) {
+      console.error(err);
+      alert('Error deleting user');
+    }
   };
 
   return (
-    <div>
+    <form onSubmit={handleSubmit}>
       <h2>Delete User</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="User ID"
-          value={userId}
-          onChange={e => setUserId(e.target.value)}
-        />
-        <button type="submit">Delete</button>
-      </form>
-    </div>
+      <input placeholder="ID" value={id} onChange={e=>setId(e.target.value)} required />
+      <button type="submit">Delete</button>
+    </form>
   );
 }
-
-export default DeleteUser;

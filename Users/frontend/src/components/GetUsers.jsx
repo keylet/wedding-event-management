@@ -1,28 +1,37 @@
-// src/components/GetUsers.js
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+const API = import.meta.env.VITE_API_BASE_URL;
 
-function GetUsers() {
+export default function GetUsers({ refresh }) {
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    // Llamada al microservicio get-user-service
-    axios.get('http://98.80.87.138:3001/api/users')
-
-      .then(response => setUsers(response.data))
-      .catch(error => console.error('Error fetching users: ', error));
-  }, []);
+    axios.get(`${API}/users`)
+      .then(res => setUsers(res.data))
+      .catch(console.error);
+  }, [refresh]);
 
   return (
     <div>
-      <h1>Users List</h1>
-      <ul>
-        {users.map(user => (
-          <li key={user.id}>{user.name}</li>
-        ))}
-      </ul>
+      <h2>Users List</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th><th>Username</th><th>Email</th><th>Password</th><th>Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          {users.map(u => (
+            <tr key={u.id}>
+              <td>{u.id}</td>
+              <td>{u.username}</td>
+              <td>{u.email}</td>
+              <td>{u.password}</td>
+              <td>{u.role}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
-
-export default GetUsers;

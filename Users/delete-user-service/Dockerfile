@@ -1,20 +1,24 @@
-# Usar una imagen base oficial de Node.js
-FROM node:20
+# Usa una imagen Node.js ligera
+FROM node:20-alpine
 
-# Establecer el directorio de trabajo dentro del contenedor
+# Crear directorio de la app
 WORKDIR /usr/src/app
 
-# Copiar el package.json y package-lock.json al contenedor
+# Copiar dependencias primero para cacheo
 COPY package*.json ./
 
-# Instalar las dependencias
+# Instalar dependencias
 RUN npm install
 
-# Copiar el resto del código de la aplicación
+# Copiar el resto del código
 COPY . .
 
-# Exponer el puerto que utiliza el servicio
-EXPOSE 3000
+# Copiar el script de espera
+COPY wait-for-it.sh /wait-for-it.sh
+RUN chmod +x /wait-for-it.sh
 
-# Comando para iniciar la aplicación
-CMD ["node", "src/server.js"]
+# Puerto expuesto
+EXPOSE 3009  # Cambia este valor según tu servicio
+
+# Comando de inicio
+CMD ["sh", "-c", "./wait-for-it.sh mysql-db:3306 --strict --timeout=30 -- node src/server.js"]
