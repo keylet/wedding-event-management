@@ -34,37 +34,38 @@ jobs:
 
       - name: Build & push user-login
         run: |
-          docker build -f Users/login-service/Dockerfile \
+          docker build -f Users/user-login-service/Dockerfile \
                        -t $DOCKERHUB_REPO:user-login \
                        .
           docker push $DOCKERHUB_REPO:user-login
 
       - name: Build & push user-get
         run: |
-          docker build -f Users/get-user-service/Dockerfile \
+          docker build -f Users/user-get-service/Dockerfile \
                        -t $DOCKERHUB_REPO:user-get \
                        .
           docker push $DOCKERHUB_REPO:user-get
 
       - name: Build & push user-update
         run: |
-          docker build -f Users/update-user-service/Dockerfile \
+          docker build -f Users/user-update-service/Dockerfile \
                        -t $DOCKERHUB_REPO:user-update \
                        .
           docker push $DOCKERHUB_REPO:user-update
 
       - name: Build & push user-delete
         run: |
-          docker build -f Users/delete-user-service/Dockerfile \
+          docker build -f Users/user-delete-service/Dockerfile \
                        -t $DOCKERHUB_REPO:user-delete \
                        .
           docker push $DOCKERHUB_REPO:user-delete
 
       - name: Build & push frontend
         run: |
+          # Build frontend using its own directory as context so COPY nginx.conf works
           docker build -f Users/frontend/Dockerfile \
                        -t $DOCKERHUB_REPO:frontend \
-                       .
+                       Users/frontend
           docker push $DOCKERHUB_REPO:frontend
 
   deploy:
@@ -81,7 +82,7 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-            # Clonar si no existe
+            # Clone if it doesn't exist
             if [ ! -d "$(dirname ${DEPLOY_DIR})" ]; then
               mkdir -p $(dirname ${DEPLOY_DIR})
             fi
@@ -94,7 +95,7 @@ jobs:
             git checkout qa
             git reset --hard origin/qa
 
-            # Deploy con Docker Compose
+            # Deploy with Docker Compose
             docker-compose pull
             docker-compose up -d --build --remove-orphans
           EOF
