@@ -1,87 +1,99 @@
-version: "3.9"
-
+version: '3'
 services:
-  # MySQL Database for Users
   mysql-db:
     image: mysql:8.0
-    restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}   # Contraseña del root
-      MYSQL_DATABASE: ${DB_NAME}            # Nombre de la base de datos por defecto
-      MYSQL_USER: ${DB_USER}                # Usuario para la base de datos
-      MYSQL_PASSWORD: ${DB_PASSWORD}        # Contraseña para el usuario
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
     ports:
-      - "3306:3306"     # Exponemos el puerto 3306 solo para otros servicios dentro de Docker
+      - "3306:3306"
     volumes:
-      - mysql-data:/var/lib/mysql    # Volumen persistente para los datos
+      - mysql_data:/var/lib/mysql
     networks:
-      - user-network
+      - users_network
 
-  # phpMyAdmin - Herramienta web para gestionar bases de datos
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
-    restart: always
     environment:
-      PMA_HOST: mysql-db         # Conectarse al contenedor mysql-db
-      PMA_PORT: 3306            # Puerto en el que MySQL está corriendo
+      PMA_HOST: mysql-db
     ports:
-      - "8081:80"         # Accede a phpMyAdmin en http://localhost:8081
+      - "8081:80"
     networks:
-      - user-network
+      - users_network
 
-  # Microservicio de Registro de Usuario
   user-registration-service:
-    build: ./user-registration-service
+    image: users-user-registration-service
+    environment:
+      DB_HOST: mysql-db
+      DB_USER: root
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
     ports:
-      - "3006:3006"  # Exponemos el puerto 3006 para este microservicio
+      - "3006:3006"
+    depends_on:
+      - mysql-db
     networks:
-      - user-network  # Conectar a la misma red Docker que MySQL
-    env_file:
-      - .env  # Asegúrate de que las variables de entorno estén configuradas correctamente
+      - users_network
 
-  # Microservicio de Obtener Usuario
-  get-user-service:
-    build: ./get-user-service
-    ports:
-      - "3001:3001"  # Exponemos el puerto 3001 para este microservicio
-    networks:
-      - user-network  # Conectar a la misma red Docker que MySQL
-    env_file:
-      - .env
-
-  # Microservicio de Eliminar Usuario
-  delete-user-service:
-    build: ./delete-user-service
-    ports:
-      - "3002:3002"  # Exponemos el puerto 3002 para este microservicio
-    networks:
-      - user-network  # Conectar a la misma red Docker que MySQL
-    env_file:
-      - .env
-
-  # Microservicio de Actualizar Usuario
   update-user-service:
-    build: ./update-user-service
+    image: users-update-user-service
+    environment:
+      DB_HOST: mysql-db
+      DB_USER: root
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
     ports:
-      - "3003:3003"  # Exponemos el puerto 3003 para este microservicio
+      - "3003:3003"
+    depends_on:
+      - mysql-db
     networks:
-      - user-network  # Conectar a la misma red Docker que MySQL
-    env_file:
-      - .env
+      - users_network
 
-  # Microservicio de Login
-  login-service:
-    build: ./login-service
+  delete-user-service:
+    image: users-delete-user-service
+    environment:
+      DB_HOST: mysql-db
+      DB_USER: root
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
     ports:
-      - "3004:3004"  # Exponemos el puerto 3004 para este microservicio
+      - "3002:3002"
+    depends_on:
+      - mysql-db
     networks:
-      - user-network  # Conectar a la misma red Docker que MySQL
-    env_file:
-      - .env
+      - users_network
+
+  login-service:
+    image: users-login-service
+    environment:
+      DB_HOST: mysql-db
+      DB_USER: root
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+    ports:
+      - "3004:3004"
+    depends_on:
+      - mysql-db
+    networks:
+      - users_network
+
+  get-user-service:
+    image: users-get-user-service
+    environment:
+      DB_HOST: mysql-db
+      DB_USER: root
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+    ports:
+      - "3001:3001"
+    depends_on:
+      - mysql-db
+    networks:
+      - users_network
 
 networks:
-  user-network:
+  users_network:
     driver: bridge
 
 volumes:
-  mysql-data:  # Volumen para los datos de MySQL
+  mysql_data:
