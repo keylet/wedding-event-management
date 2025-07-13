@@ -80,21 +80,22 @@ jobs:
 
       - name: Deploy to EC2
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-            # Clonar si no existe
-            if [ ! -d "$(dirname ${DEPLOY_DIR})" ]; then
-              mkdir -p $(dirname ${DEPLOY_DIR})
-            fi
-            if [ ! -d "${DEPLOY_DIR}" ]; then
-              git clone --branch qa $REPO_URL ${DEPLOY_DIR}
+          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} <<EOF
+            # Ensure parent directory exists
+            if [ ! -d "$(dirname $DEPLOY_DIR)" ]; then
+              mkdir -p "$(dirname $DEPLOY_DIR)"
             fi
 
-            cd ${DEPLOY_DIR}
+            # Clone or update the repo
+            if [ ! -d "$DEPLOY_DIR" ]; then
+              git clone --branch qa $REPO_URL "$DEPLOY_DIR"
+            fi
+            cd "$DEPLOY_DIR"
             git fetch origin qa
             git checkout qa
             git reset --hard origin/qa
 
-            # Despliegue con Docker Compose
+            # Deploy with Docker Compose
             docker-compose pull
             docker-compose up -d --build --remove-orphans
           EOF
