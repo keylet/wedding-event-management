@@ -27,32 +27,44 @@ jobs:
 
       - name: Build & push user-registration
         run: |
-          docker build -t $DOCKERHUB_REPO:user-registration Users/user-registration-service
+          docker build -f Users/user-registration-service/Dockerfile \
+                       -t $DOCKERHUB_REPO:user-registration \
+                       .
           docker push $DOCKERHUB_REPO:user-registration
 
       - name: Build & push user-login
         run: |
-          docker build -t $DOCKERHUB_REPO:user-login Users/user-login-service
+          docker build -f Users/user-login-service/Dockerfile \
+                       -t $DOCKERHUB_REPO:user-login \
+                       .
           docker push $DOCKERHUB_REPO:user-login
 
       - name: Build & push user-get
         run: |
-          docker build -t $DOCKERHUB_REPO:user-get Users/user-get-service
+          docker build -f Users/user-get-service/Dockerfile \
+                       -t $DOCKERHUB_REPO:user-get \
+                       .
           docker push $DOCKERHUB_REPO:user-get
 
       - name: Build & push user-update
         run: |
-          docker build -t $DOCKERHUB_REPO:user-update Users/user-update-service
+          docker build -f Users/user-update-service/Dockerfile \
+                       -t $DOCKERHUB_REPO:user-update \
+                       .
           docker push $DOCKERHUB_REPO:user-update
 
       - name: Build & push user-delete
         run: |
-          docker build -t $DOCKERHUB_REPO:user-delete Users/user-delete-service
+          docker build -f Users/user-delete-service/Dockerfile \
+                       -t $DOCKERHUB_REPO:user-delete \
+                       .
           docker push $DOCKERHUB_REPO:user-delete
 
       - name: Build & push frontend
         run: |
-          docker build -t $DOCKERHUB_REPO:frontend -f Users/frontend/Dockerfile Users/frontend
+          docker build -f Users/frontend/Dockerfile \
+                       -t $DOCKERHUB_REPO:frontend \
+                       .
           docker push $DOCKERHUB_REPO:frontend
 
   deploy:
@@ -69,7 +81,7 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-            # Si no existe el directorio, clona el repo en la rama qa
+            # Clonar si no existe
             if [ ! -d "$(dirname ${DEPLOY_DIR})" ]; then
               mkdir -p $(dirname ${DEPLOY_DIR})
             fi
@@ -82,7 +94,7 @@ jobs:
             git checkout qa
             git reset --hard origin/qa
 
-            # Levanta el stack con Docker Compose
+            # Despliegue con Docker Compose
             cd ${DEPLOY_DIR}
             docker-compose pull
             docker-compose up -d --build --remove-orphans
