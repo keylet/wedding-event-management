@@ -14,7 +14,7 @@ RUN npm install
 COPY . .
 
 # Copiar el script de espera
-COPY wait-for-it.sh /wait-for-it.sh
+COPY Users/wait-for-it.sh /wait-for-it.sh
 RUN chmod +x /wait-for-it.sh
 
 # Puerto expuesto
