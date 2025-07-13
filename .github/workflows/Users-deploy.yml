@@ -8,8 +8,7 @@ on:
 env:
   DOCKERHUB_REPO: keylet30/users-wedding
   REPO_URL:       https://github.com/keylet/wedding-event-management.git
-  # Usamos la ruta absoluta en el home de tu usuario (ubuntu)
-  DEPLOY_DIR:     /home/${{ secrets.EC2_USER }}/wedding-event-management/Users
+  DEPLOY_BASE:    /home/${{ secrets.EC2_USER }}/wedding-event-management
 
 jobs:
   build-and-push:
@@ -17,8 +16,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
@@ -29,43 +27,37 @@ jobs:
       - name: Build & push user-registration
         run: |
           docker build -f Users/user-registration-service/Dockerfile \
-                       -t $DOCKERHUB_REPO:user-registration \
-                       .
+                       -t $DOCKERHUB_REPO:user-registration .
           docker push $DOCKERHUB_REPO:user-registration
 
       - name: Build & push user-login
         run: |
           docker build -f Users/login-service/Dockerfile \
-                       -t $DOCKERHUB_REPO:user-login \
-                       .
+                       -t $DOCKERHUB_REPO:user-login .
           docker push $DOCKERHUB_REPO:user-login
 
       - name: Build & push user-get
         run: |
           docker build -f Users/get-user-service/Dockerfile \
-                       -t $DOCKERHUB_REPO:user-get \
-                       .
+                       -t $DOCKERHUB_REPO:user-get .
           docker push $DOCKERHUB_REPO:user-get
 
       - name: Build & push user-update
         run: |
           docker build -f Users/update-user-service/Dockerfile \
-                       -t $DOCKERHUB_REPO:user-update \
-                       .
+                       -t $DOCKERHUB_REPO:user-update .
           docker push $DOCKERHUB_REPO:user-update
 
       - name: Build & push user-delete
         run: |
           docker build -f Users/delete-user-service/Dockerfile \
-                       -t $DOCKERHUB_REPO:user-delete \
-                       .
+                       -t $DOCKERHUB_REPO:user-delete .
           docker push $DOCKERHUB_REPO:user-delete
 
       - name: Build & push frontend
         run: |
           docker build -f Users/frontend/Dockerfile \
-                       -t $DOCKERHUB_REPO:frontend \
-                       Users/frontend
+                       -t $DOCKERHUB_REPO:frontend Users/frontend
           docker push $DOCKERHUB_REPO:frontend
 
   deploy:
@@ -82,22 +74,23 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} <<EOF
-            # Asegurar que el padre exista
-            PARENT_DIR=\$(dirname "$DEPLOY_DIR")
-            if [ ! -d "\$PARENT_DIR" ]; then
-              mkdir -p "\$PARENT_DIR"
+            # Ensure base directory exists
+            if [ ! -d "$DEPLOY_BASE" ]; then
+              mkdir -p "$DEPLOY_BASE"
             fi
 
-            # Clonar o actualizar el repo
-            if [ ! -d "$DEPLOY_DIR/.git" ]; then
-              git clone --branch qa $REPO_URL "$DEPLOY_DIR"
+            # Clone or update repo at DEPLOY_BASE
+            if [ ! -d "$DEPLOY_BASE/.git" ]; then
+              git clone --branch qa $REPO_URL "$DEPLOY_BASE"
+            else
+              cd "$DEPLOY_BASE"
+              git fetch origin qa
+              git checkout qa
+              git reset --hard origin/qa
             fi
-            cd "$DEPLOY_DIR"
-            git fetch origin qa
-            git checkout qa
-            git reset --hard origin/qa
 
-            # Despliegue con Docker Compose
+            # Deploy with Docker Compose from the 'Users' subfolder
+            cd "$DEPLOY_BASE/Users"
             docker-compose pull
             docker-compose up -d --build --remove-orphans
           EOF
