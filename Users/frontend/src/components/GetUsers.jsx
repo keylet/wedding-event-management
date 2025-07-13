@@ -7,7 +7,8 @@ function GetUsers() {
 
   useEffect(() => {
     // Llamada al microservicio get-user-service
-    axios.get('http://<EC2_PUBLIC_IP>:3002/users') // Cambia la IP pública de tu EC2
+    axios.get('http://98.80.87.138:3001/api/users')
+
       .then(response => setUsers(response.data))
       .catch(error => console.error('Error fetching users: ', error));
   }, []);

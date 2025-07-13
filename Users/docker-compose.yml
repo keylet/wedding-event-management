@@ -1,97 +1,106 @@
-networks:
-  user-network:
-    driver: bridge
+version: '3.8'
+
 services:
-  mysql-db:
+  user-registration-service:
+    image: keylet30/users-wedding:user-registration
     environment:
-      MYSQL_ALLOW_EMPTY_PASSWORD: ${MYSQL_ALLOW_EMPTY_PASSWORD}
-      MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: ${DB_HOST}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DB_PORT: ${DB_PORT}
+    ports:
+      - "3006:3006"
+    depends_on:
+      - mysql-db
+    networks:
+      - users_network
+
+  user-login-service:
+    image: keylet30/users-wedding:user-login
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DB_PORT: ${DB_PORT}
+    ports:
+      - "3007:3007"
+    depends_on:
+      - mysql-db
+    networks:
+      - users_network
+
+  user-update-service:
+    image: keylet30/users-wedding:user-update
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DB_PORT: ${DB_PORT}
+    ports:
+      - "3008:3008"
+    depends_on:
+      - mysql-db
+    networks:
+      - users_network
+
+  user-delete-service:
+    image: keylet30/users-wedding:user-delete
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DB_PORT: ${DB_PORT}
+    ports:
+      - "3009:3009"
+    depends_on:
+      - mysql-db
+    networks:
+      - users_network
+
+  user-get-service:
+    image: keylet30/users-wedding:user-get
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DB_PORT: ${DB_PORT}
+    ports:
+      - "3010:3010"
+    depends_on:
+      - mysql-db
+    networks:
+      - users_network
+
+  mysql-db:
+    image: keylet30/users-wedding:mysql-8.0
+    environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_USER: ${DB_USER}
-    image: keylet30/users-wedding:mysql-8.0
-    networks:
-    - users_network
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_ALLOW_EMPTY_PASSWORD: ${MYSQL_ALLOW_EMPTY_PASSWORD}
     volumes:
-    - mysql-data:/var/lib/mysql
+      - mysql-data:/var/lib/mysql
+    networks:
+      - users_network
+
   phpmyadmin:
+    image: keylet30/users-wedding:phpmyadmin-latest
     environment:
       PMA_HOST: ${DB_HOST}
-    image: keylet30/users-wedding:phpmyadmin-latest
-    networks:
-    - users_network
     ports:
-    - 80:80
-  user-delete-service:
-    depends_on:
-    - mysql-db
-    environment:
-      DB_HOST: ${DB_HOST}
-      DB_NAME: ${DB_NAME}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_PORT: ${DB_PORT}
-      DB_USER: ${DB_USER}
-    image: keylet30/users-wedding:user-delete
+      - "80:80"
     networks:
-    - users_network
-    ports:
-    - 3009:3009
-  user-get-service:
-    depends_on:
-    - mysql-db
-    environment:
-      DB_HOST: ${DB_HOST}
-      DB_NAME: ${DB_NAME}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_PORT: ${DB_PORT}
-      DB_USER: ${DB_USER}
-    image: keylet30/users-wedding:user-get
-    networks:
-    - users_network
-    ports:
-    - 3010:3010
-  user-login-service:
-    depends_on:
-    - mysql-db
-    environment:
-      DB_HOST: ${DB_HOST}
-      DB_NAME: ${DB_NAME}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_PORT: ${DB_PORT}
-      DB_USER: ${DB_USER}
-    image: keylet30/users-wedding:user-login
-    networks:
-    - users_network
-    ports:
-    - 3007:3007
-  user-registration-service:
-    depends_on:
-    - mysql-db
-    environment:
-      DB_HOST: ${DB_HOST}
-      DB_NAME: ${DB_NAME}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_PORT: ${DB_PORT}
-      DB_USER: ${DB_USER}
-    image: keylet30/users-wedding:user-registration
-    networks:
-    - users_network
-    ports:
-    - 3006:3006
-  user-update-service:
-    depends_on:
-    - mysql-db
-    environment:
-      DB_HOST: ${DB_HOST}
-      DB_NAME: ${DB_NAME}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_PORT: ${DB_PORT}
-      DB_USER: ${DB_USER}
-    image: keylet30/users-wedding:user-update
-    networks:
-    - users_network
-    ports:
-    - 3008:3008
-version: '3.8'
+      - users_network
+
+networks:
+  users_network:
+    driver: bridge
+
 volumes:
-  mysql-data: null
+  mysql-data:

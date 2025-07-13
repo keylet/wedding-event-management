@@ -12,7 +12,8 @@ function CreateUser() {
     const newUser = { name, email };
     
     // Llamada al microservicio user-registration-service
-    axios.post('http://<EC2_PUBLIC_IP>:3005/users', newUser) // Cambia la IP pública de tu EC2
+    axios.post('http://98.80.87.138:3002/users', newUser)
+
       .then(response => {
         alert('User created successfully!');
         setName('');

@@ -12,7 +12,8 @@ function UpdateUser() {
     const updatedUser = { name: newName };
     
     // Llamada al microservicio update-user-service
-    axios.put(`http://<EC2_PUBLIC_IP>:3004/users/${userId}`, updatedUser) // Cambia la IP pública de tu EC2
+    axios.put(`http://98.80.87.138:3004/users/${userId}`, updatedUser)
+
       .then(response => {
         alert('User updated successfully!');
         setUserId('');

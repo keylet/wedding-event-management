@@ -12,7 +12,8 @@ function Login() {
     const credentials = { email, password };
     
     // Llamada al microservicio login-service
-    axios.post('http://<EC2_PUBLIC_IP>:3003/login', credentials) // Cambia la IP pública de tu EC2
+    axios.post('http://98.80.87.138:3003/login', credentials)
+
       .then(response => {
         alert('Login successful!');
         setEmail('');

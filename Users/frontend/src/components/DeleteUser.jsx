@@ -9,7 +9,8 @@ function DeleteUser() {
     e.preventDefault();
 
     // Llamada al microservicio delete-user-service
-    axios.delete(`http://<EC2_PUBLIC_IP>:3001/users/${userId}`) // Cambia la IP pública de tu EC2
+    axios.delete(`http://98.80.87.138:3005/users/${userId}`)
+
       .then(response => {
         alert('User deleted successfully!');
         setUserId('');
