@@ -1,6 +1,6 @@
 # Delete User Service
 
-Este microservicio permite eliminar usuarios de la base de datos.
+este microservicio permite eliminar usuarios de la base de datos.
 
 ## Requisitos previos
 
