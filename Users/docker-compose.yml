@@ -5,9 +5,9 @@ services:
     image: keylet30/users-wedding:mysql-8.0
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE:     ${DB_NAME}
-      MYSQL_USER:         ${DB_USER}
-      MYSQL_PASSWORD:     ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_ALLOW_EMPTY_PASSWORD: ${MYSQL_ALLOW_EMPTY_PASSWORD}
     volumes:
       - mysql_data:/var/lib/mysql
@@ -19,30 +19,16 @@ services:
       timeout: 3s
       retries: 5
 
-  phpmyadmin:
-    image: phpmyadmin:latest
-    environment:
-      PMA_HOST:     mysql-db
-      PMA_USER:     ${DB_USER}
-      PMA_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "8081:80"
-    depends_on:
-      mysql-db:
-        condition: service_healthy
-    networks:
-      - users_network
-
   user-registration-service:
     image: keylet30/users-wedding:user-registration
     environment:
-      DB_HOST:     ${DB_HOST}
-      DB_USER:     ${DB_USER}
+      DB_HOST: ${DB_HOST}
+      DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME:     ${DB_NAME}
-      DB_PORT:     ${DB_PORT}
-      JWT_SECRET:  ${JWT_SECRET}
-      PORT:        3006
+      DB_NAME: ${DB_NAME}
+      DB_PORT: ${DB_PORT}
+      JWT_SECRET: ${JWT_SECRET}
+      PORT: 3006
     ports:
       - "3006:3006"
     depends_on:
@@ -51,17 +37,22 @@ services:
     restart: on-failure
     networks:
       - users_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3006"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
 
   user-login-service:
     image: keylet30/users-wedding:user-login
     environment:
-      DB_HOST:     ${DB_HOST}
-      DB_USER:     ${DB_USER}
+      DB_HOST: ${DB_HOST}
+      DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME:     ${DB_NAME}
-      DB_PORT:     ${DB_PORT}
-      JWT_SECRET:  ${JWT_SECRET}
-      PORT:        3007
+      DB_NAME: ${DB_NAME}
+      DB_PORT: ${DB_PORT}
+      JWT_SECRET: ${JWT_SECRET}
+      PORT: 3007
     ports:
       - "3007:3007"
     depends_on:
@@ -70,17 +61,22 @@ services:
     restart: on-failure
     networks:
       - users_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3007"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
 
   user-update-service:
     image: keylet30/users-wedding:user-update
     environment:
-      DB_HOST:     ${DB_HOST}
-      DB_USER:     ${DB_USER}
+      DB_HOST: ${DB_HOST}
+      DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME:     ${DB_NAME}
-      DB_PORT:     ${DB_PORT}
-      JWT_SECRET:  ${JWT_SECRET}
-      PORT:        3008
+      DB_NAME: ${DB_NAME}
+      DB_PORT: ${DB_PORT}
+      JWT_SECRET: ${JWT_SECRET}
+      PORT: 3008
     ports:
       - "3008:3008"
     depends_on:
@@ -89,17 +85,22 @@ services:
     restart: on-failure
     networks:
       - users_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3008"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
 
   user-delete-service:
     image: keylet30/users-wedding:user-delete
     environment:
-      DB_HOST:     ${DB_HOST}
-      DB_USER:     ${DB_USER}
+      DB_HOST: ${DB_HOST}
+      DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME:     ${DB_NAME}
-      DB_PORT:     ${DB_PORT}
-      JWT_SECRET:  ${JWT_SECRET}
-      PORT:        3009
+      DB_NAME: ${DB_NAME}
+      DB_PORT: ${DB_PORT}
+      JWT_SECRET: ${JWT_SECRET}
+      PORT: 3009
     ports:
       - "3009:3009"
     depends_on:
@@ -108,17 +109,22 @@ services:
     restart: on-failure
     networks:
       - users_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3009"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
 
   user-get-service:
     image: keylet30/users-wedding:user-get
     environment:
-      DB_HOST:     ${DB_HOST}
-      DB_USER:     ${DB_USER}
+      DB_HOST: ${DB_HOST}
+      DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME:     ${DB_NAME}
-      DB_PORT:     ${DB_PORT}
-      JWT_SECRET:  ${JWT_SECRET}
-      PORT:        3010
+      DB_NAME: ${DB_NAME}
+      DB_PORT: ${DB_PORT}
+      JWT_SECRET: ${JWT_SECRET}
+      PORT: 3010
     ports:
       - "3010:3010"
     depends_on:
@@ -127,6 +133,11 @@ services:
     restart: on-failure
     networks:
       - users_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3010"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
 
   users-frontend:
     build:
