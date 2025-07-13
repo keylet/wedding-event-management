@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout repo
         uses: actions/checkout@v3
 
       - name: Log in to Docker Hub
@@ -34,28 +34,28 @@ jobs:
 
       - name: Build & push user-login
         run: |
-          docker build -f Users/user-login-service/Dockerfile \
+          docker build -f Users/login-service/Dockerfile \
                        -t $DOCKERHUB_REPO:user-login \
                        .
           docker push $DOCKERHUB_REPO:user-login
 
       - name: Build & push user-get
         run: |
-          docker build -f Users/user-get-service/Dockerfile \
+          docker build -f Users/get-user-service/Dockerfile \
                        -t $DOCKERHUB_REPO:user-get \
                        .
           docker push $DOCKERHUB_REPO:user-get
 
       - name: Build & push user-update
         run: |
-          docker build -f Users/user-update-service/Dockerfile \
+          docker build -f Users/update-user-service/Dockerfile \
                        -t $DOCKERHUB_REPO:user-update \
                        .
           docker push $DOCKERHUB_REPO:user-update
 
       - name: Build & push user-delete
         run: |
-          docker build -f Users/user-delete-service/Dockerfile \
+          docker build -f Users/delete-user-service/Dockerfile \
                        -t $DOCKERHUB_REPO:user-delete \
                        .
           docker push $DOCKERHUB_REPO:user-delete
@@ -94,8 +94,7 @@ jobs:
             git checkout qa
             git reset --hard origin/qa
 
-            # Despliegue con Docker Compose
-            cd ${DEPLOY_DIR}
+            # Deploy con Docker Compose
             docker-compose pull
             docker-compose up -d --build --remove-orphans
           EOF
