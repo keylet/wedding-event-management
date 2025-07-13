@@ -1,3 +1,4 @@
+# .github/workflows/deploy.yml
 name: Build & Deploy to EC2
 
 on:
@@ -26,32 +27,37 @@ jobs:
 
       - name: Build & push user-registration
         run: |
-          docker build -f Users/registration-service/Dockerfile \
-                       -t $DOCKERHUB_REPO:user-registration .
+          docker build -f Users/user-registration-service/Dockerfile \
+                       -t $DOCKERHUB_REPO:user-registration \
+                       .
           docker push $DOCKERHUB_REPO:user-registration
 
       - name: Build & push user-login
         run: |
           docker build -f Users/login-service/Dockerfile \
-                       -t $DOCKERHUB_REPO:user-login .
+                       -t $DOCKERHUB_REPO:user-login \
+                       .
           docker push $DOCKERHUB_REPO:user-login
 
       - name: Build & push user-get
         run: |
           docker build -f Users/get-user-service/Dockerfile \
-                       -t $DOCKERHUB_REPO:user-get .
+                       -t $DOCKERHUB_REPO:user-get \
+                       .
           docker push $DOCKERHUB_REPO:user-get
 
       - name: Build & push user-update
         run: |
           docker build -f Users/update-user-service/Dockerfile \
-                       -t $DOCKERHUB_REPO:user-update .
+                       -t $DOCKERHUB_REPO:user-update \
+                       .
           docker push $DOCKERHUB_REPO:user-update
 
       - name: Build & push user-delete
         run: |
           docker build -f Users/delete-user-service/Dockerfile \
-                       -t $DOCKERHUB_REPO:user-delete .
+                       -t $DOCKERHUB_REPO:user-delete \
+                       .
           docker push $DOCKERHUB_REPO:user-delete
 
       - name: Build & push frontend
@@ -75,7 +81,7 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-            # Clona si no existe
+            # Clonar si no existe
             if [ ! -d "$(dirname ${DEPLOY_DIR})" ]; then
               mkdir -p $(dirname ${DEPLOY_DIR})
             fi
@@ -88,8 +94,7 @@ jobs:
             git checkout qa
             git reset --hard origin/qa
 
-            # Levanta el stack
-            cd ${DEPLOY_DIR}
+            # Despliegue con Docker Compose
             docker-compose pull
             docker-compose up -d --build --remove-orphans
           EOF
