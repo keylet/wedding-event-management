@@ -1,1 +1,11 @@
 ssh -i "C:/Users/raich/Downloads/user-key.pem" ubuntu@ec2-98-80-87-138.compute-1.amazonaws.com
+
+Descargar imagenes
+
+docker pull keylet30/users-wedding:user-registration
+docker pull keylet30/users-wedding:user-update
+docker pull keylet30/users-wedding:user-login
+docker pull keylet30/users-wedding:user-get
+docker pull keylet30/users-wedding:user-delete
+docker pull keylet30/users-wedding:mysql-8.0
+docker pull keylet30/users-wedding:phpmyadmin-latest
