@@ -1,0 +1,1 @@
+ssh -i "C:/Users/raich/Downloads/user-key.pem" ubuntu@ec2-98-80-87-138.compute-1.amazonaws.com

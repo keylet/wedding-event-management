@@ -4,8 +4,7 @@
 *.swp
 .DS_Store
 
-# Ignore all .env files
-*.env
+
 
 # Ignore build folders
 target/

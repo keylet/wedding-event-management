@@ -1,4 +1,3 @@
-
 name: CI/CD Deployment for Update User Service
 
 on:
