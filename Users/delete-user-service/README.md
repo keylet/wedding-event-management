@@ -5,7 +5,7 @@ este microservicio permite eliminar usuarios de la base de datos.
 ## Requisitos previos
 
 - Node.js v20+
-- Docker
+- Docker.
 
 ## Instalación
 
