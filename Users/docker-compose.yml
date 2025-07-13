@@ -4,7 +4,7 @@ services:
   user-registration-service:
     image: keylet30/users-wedding:user-registration
     environment:
-      DB_HOST: mysql-db
+      DB_HOST: ${DB_HOST}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME}
@@ -15,12 +15,11 @@ services:
       - mysql-db
     networks:
       - users_network
-    command: ["./wait-for-it.sh", "mysql-db:3306", "--", "docker-entrypoint.sh", "node", "server.js"]
 
   user-login-service:
     image: keylet30/users-wedding:user-login
     environment:
-      DB_HOST: mysql-db
+      DB_HOST: ${DB_HOST}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME}
@@ -31,12 +30,11 @@ services:
       - mysql-db
     networks:
       - users_network
-    command: ["./wait-for-it.sh", "mysql-db:3306", "--", "docker-entrypoint.sh", "node", "server.js"]
 
   user-update-service:
     image: keylet30/users-wedding:user-update
     environment:
-      DB_HOST: mysql-db
+      DB_HOST: ${DB_HOST}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME}
@@ -47,12 +45,11 @@ services:
       - mysql-db
     networks:
       - users_network
-    command: ["./wait-for-it.sh", "mysql-db:3306", "--", "docker-entrypoint.sh", "node", "server.js"]
 
   user-delete-service:
     image: keylet30/users-wedding:user-delete
     environment:
-      DB_HOST: mysql-db
+      DB_HOST: ${DB_HOST}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME}
@@ -63,12 +60,11 @@ services:
       - mysql-db
     networks:
       - users_network
-    command: ["./wait-for-it.sh", "mysql-db:3306", "--", "docker-entrypoint.sh", "node", "server.js"]
 
   user-get-service:
     image: keylet30/users-wedding:user-get
     environment:
-      DB_HOST: mysql-db
+      DB_HOST: ${DB_HOST}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME}
@@ -79,7 +75,6 @@ services:
       - mysql-db
     networks:
       - users_network
-    command: ["./wait-for-it.sh", "mysql-db:3306", "--", "docker-entrypoint.sh", "node", "server.js"]
 
   mysql-db:
     image: keylet30/users-wedding:mysql-8.0
@@ -97,7 +92,7 @@ services:
   phpmyadmin:
     image: keylet30/users-wedding:phpmyadmin-latest
     environment:
-      PMA_HOST: mysql-db
+      PMA_HOST: ${DB_HOST}
     ports:
       - "80:80"
     networks:
