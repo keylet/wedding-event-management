@@ -14,7 +14,6 @@ jobs:
   build-and-push:
     name: 📦 Build & Push Images
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
 
@@ -64,7 +63,6 @@ jobs:
     name: 🚀 SSH & Deploy on EC2
     needs: build-and-push
     runs-on: ubuntu-latest
-
     steps:
       - name: Start SSH agent
         uses: webfactory/ssh-agent@v0.5.3
@@ -74,10 +72,10 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} <<EOF
-            # Ensure the base directory exists
+            # Creamos base si no existe
             mkdir -p "$DEPLOY_BASE"
 
-            # Clone or update the repo at DEPLOY_BASE
+            # Clonamos o actualizamos repo
             if [ ! -d "$DEPLOY_BASE/.git" ]; then
               git clone --branch qa $REPO_URL "$DEPLOY_BASE"
             else
@@ -87,8 +85,8 @@ jobs:
               git reset --hard origin/qa
             fi
 
-            # Move into the Users folder to run docker-compose
+            # Entramos en la carpeta Users y usamos el plugin v2
             cd "$DEPLOY_BASE/Users"
-            docker-compose pull
-            docker-compose up -d --build --remove-orphans
+            docker compose pull
+            docker compose up -d --build --remove-orphans
           EOF
