@@ -1,4 +1,3 @@
-# .github/workflows/deploy.yml
 name: Build & Deploy to EC2
 
 on:
@@ -16,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Log in to Docker Hub
@@ -27,42 +26,36 @@ jobs:
 
       - name: Build & push user-registration
         run: |
-          docker build -f Users/user-registration-service/Dockerfile \
-                       -t $DOCKERHUB_REPO:user-registration \
-                       .
+          docker build -f Users/registration-service/Dockerfile \
+                       -t $DOCKERHUB_REPO:user-registration .
           docker push $DOCKERHUB_REPO:user-registration
 
       - name: Build & push user-login
         run: |
-          docker build -f Users/user-login-service/Dockerfile \
-                       -t $DOCKERHUB_REPO:user-login \
-                       .
+          docker build -f Users/login-service/Dockerfile \
+                       -t $DOCKERHUB_REPO:user-login .
           docker push $DOCKERHUB_REPO:user-login
 
       - name: Build & push user-get
         run: |
-          docker build -f Users/user-get-service/Dockerfile \
-                       -t $DOCKERHUB_REPO:user-get \
-                       .
+          docker build -f Users/get-user-service/Dockerfile \
+                       -t $DOCKERHUB_REPO:user-get .
           docker push $DOCKERHUB_REPO:user-get
 
       - name: Build & push user-update
         run: |
-          docker build -f Users/user-update-service/Dockerfile \
-                       -t $DOCKERHUB_REPO:user-update \
-                       .
+          docker build -f Users/update-user-service/Dockerfile \
+                       -t $DOCKERHUB_REPO:user-update .
           docker push $DOCKERHUB_REPO:user-update
 
       - name: Build & push user-delete
         run: |
-          docker build -f Users/user-delete-service/Dockerfile \
-                       -t $DOCKERHUB_REPO:user-delete \
-                       .
+          docker build -f Users/delete-user-service/Dockerfile \
+                       -t $DOCKERHUB_REPO:user-delete .
           docker push $DOCKERHUB_REPO:user-delete
 
       - name: Build & push frontend
         run: |
-          # Build frontend using its own directory as context so COPY nginx.conf works
           docker build -f Users/frontend/Dockerfile \
                        -t $DOCKERHUB_REPO:frontend \
                        Users/frontend
@@ -82,7 +75,7 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-            # Clone if it doesn't exist
+            # Clona si no existe
             if [ ! -d "$(dirname ${DEPLOY_DIR})" ]; then
               mkdir -p $(dirname ${DEPLOY_DIR})
             fi
@@ -95,7 +88,8 @@ jobs:
             git checkout qa
             git reset --hard origin/qa
 
-            # Deploy with Docker Compose
+            # Levanta el stack
+            cd ${DEPLOY_DIR}
             docker-compose pull
             docker-compose up -d --build --remove-orphans
           EOF
