@@ -18,7 +18,7 @@ COPY wait-for-it.sh /wait-for-it.sh
 RUN chmod +x /wait-for-it.sh
 
 # Puerto expuesto
-EXPOSE 3009  # Cambia este valor según tu servicio
+EXPOSE 3009  
 
 # Comando de inicio
 CMD ["sh", "-c", "./wait-for-it.sh mysql-db:3306 --strict --timeout=30 -- node src/server.js"]
