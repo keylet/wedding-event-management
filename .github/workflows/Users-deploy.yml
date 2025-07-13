@@ -8,7 +8,8 @@ on:
 env:
   DOCKERHUB_REPO: keylet30/users-wedding
   REPO_URL:       https://github.com/keylet/wedding-event-management.git
-  DEPLOY_DIR:     ~/wedding-event-management/Users
+  # Usamos la ruta absoluta en el home de tu usuario (ubuntu)
+  DEPLOY_DIR:     /home/${{ secrets.EC2_USER }}/wedding-event-management/Users
 
 jobs:
   build-and-push:
@@ -81,13 +82,14 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} <<EOF
-            # Ensure parent directory exists
-            if [ ! -d "$(dirname $DEPLOY_DIR)" ]; then
-              mkdir -p "$(dirname $DEPLOY_DIR)"
+            # Asegurar que el padre exista
+            PARENT_DIR=\$(dirname "$DEPLOY_DIR")
+            if [ ! -d "\$PARENT_DIR" ]; then
+              mkdir -p "\$PARENT_DIR"
             fi
 
-            # Clone or update the repo
-            if [ ! -d "$DEPLOY_DIR" ]; then
+            # Clonar o actualizar el repo
+            if [ ! -d "$DEPLOY_DIR/.git" ]; then
               git clone --branch qa $REPO_URL "$DEPLOY_DIR"
             fi
             cd "$DEPLOY_DIR"
@@ -95,7 +97,7 @@ jobs:
             git checkout qa
             git reset --hard origin/qa
 
-            # Deploy with Docker Compose
+            # Despliegue con Docker Compose
             docker-compose pull
             docker-compose up -d --build --remove-orphans
           EOF
