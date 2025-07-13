@@ -11,7 +11,7 @@ This project follows a **microservices architecture**, running **27 independent 
 
 ![Architecture Diagram](image.png "Architecture Diagram")
 
----
+------
 
 ## ⚙️ **Technology Stack**
 - **Backend**
