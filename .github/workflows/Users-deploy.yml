@@ -8,7 +8,7 @@ on:
 env:
   DOCKERHUB_REPO: keylet30/users-wedding
   REPO_URL:       https://github.com/keylet/wedding-event-management.git
-  DEPLOY_BASE:    /home/${{ secrets.EC2_USER }}/wedding-event-management
+  DEPLOY_DIR:     /home/${{ secrets.EC2_USER }}/wedding-event-management/Users
 
 jobs:
   build-and-push:
@@ -16,7 +16,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
@@ -74,23 +75,18 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} <<EOF
-            # Ensure base directory exists
-            if [ ! -d "$DEPLOY_BASE" ]; then
-              mkdir -p "$DEPLOY_BASE"
+            PARENT_DIR=\$(dirname "$DEPLOY_DIR")
+            mkdir -p "\$PARENT_DIR"
+
+            if [ ! -d "$DEPLOY_DIR/.git" ]; then
+              git clone --branch qa $REPO_URL "$DEPLOY_DIR"
             fi
 
-            # Clone or update repo at DEPLOY_BASE
-            if [ ! -d "$DEPLOY_BASE/.git" ]; then
-              git clone --branch qa $REPO_URL "$DEPLOY_BASE"
-            else
-              cd "$DEPLOY_BASE"
-              git fetch origin qa
-              git checkout qa
-              git reset --hard origin/qa
-            fi
+            cd "$DEPLOY_DIR"
+            git fetch origin qa
+            git checkout qa
+            git reset --hard origin/qa
 
-            # Deploy with Docker Compose from the 'Users' subfolder
-            cd "$DEPLOY_BASE/Users"
             docker-compose pull
             docker-compose up -d --build --remove-orphans
           EOF
