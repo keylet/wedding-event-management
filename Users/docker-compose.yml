@@ -3,161 +3,180 @@ version: '3.8'
 services:
   mysql-db:
     image: keylet30/users-wedding:mysql-8.0
+    container_name: users-mysql-db
+    env_file:
+      - ./.env
+    restart: always
+    ports:
+      - "${DB_PORT}:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${DB_USER}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_ALLOW_EMPTY_PASSWORD: ${MYSQL_ALLOW_EMPTY_PASSWORD}
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      MYSQL_DATABASE:    "${DB_NAME}"
+      MYSQL_USER:        "${DB_USER}"
+      MYSQL_PASSWORD:    "${DB_PASSWORD}"
+      MYSQL_ALLOW_EMPTY_PASSWORD: "${MYSQL_ALLOW_EMPTY_PASSWORD}"
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
       - users_network
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: users-phpmyadmin
+    env_file:
+      - ./.env
+    restart: always
+    depends_on:
+      - mysql-db
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST:     "${DB_HOST}"
+      PMA_USER:     "${DB_USER}"
+      PMA_PASSWORD: "${DB_PASSWORD}"
+    networks:
+      - users_network
 
   user-registration-service:
+    build:
+      context: ./user-registration-service
+      dockerfile: Dockerfile
     image: keylet30/users-wedding:user-registration
-    environment:
-      DB_HOST: ${DB_HOST}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME: ${DB_NAME}
-      DB_PORT: ${DB_PORT}
-      JWT_SECRET: ${JWT_SECRET}
-      PORT: 3006
+    container_name: users-user-registration-service
+    env_file:
+      - ./.env
+    restart: on-failure
+    depends_on:
+      - mysql-db
     ports:
       - "3006:3006"
-    depends_on:
-      mysql-db:
-        condition: service_healthy
-    restart: on-failure
+    environment:
+      DB_HOST:     "${DB_HOST}"
+      DB_PORT:     "${DB_PORT}"
+      DB_USER:     "${DB_USER}"
+      DB_PASSWORD: "${DB_PASSWORD}"
+      DB_NAME:     "${DB_NAME}"
+      JWT_SECRET:  "${JWT_SECRET}"
+      PORT:        3006
     networks:
       - users_network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3006"]
-      interval: 5s
-      timeout: 3s
-      retries: 3
 
   user-login-service:
+    build:
+      context: ./login-service
+      dockerfile: Dockerfile
     image: keylet30/users-wedding:user-login
-    environment:
-      DB_HOST: ${DB_HOST}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME: ${DB_NAME}
-      DB_PORT: ${DB_PORT}
-      JWT_SECRET: ${JWT_SECRET}
-      PORT: 3007
+    container_name: users-user-login-service
+    env_file:
+      - ./.env
+    restart: on-failure
+    depends_on:
+      - mysql-db
     ports:
       - "3007:3007"
-    depends_on:
-      mysql-db:
-        condition: service_healthy
-    restart: on-failure
+    environment:
+      DB_HOST:     "${DB_HOST}"
+      DB_PORT:     "${DB_PORT}"
+      DB_USER:     "${DB_USER}"
+      DB_PASSWORD: "${DB_PASSWORD}"
+      DB_NAME:     "${DB_NAME}"
+      JWT_SECRET:  "${JWT_SECRET}"
+      PORT:        3007
     networks:
       - users_network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3007"]
-      interval: 5s
-      timeout: 3s
-      retries: 3
 
   user-update-service:
+    build:
+      context: ./update-user-service
+      dockerfile: Dockerfile
     image: keylet30/users-wedding:user-update
-    environment:
-      DB_HOST: ${DB_HOST}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME: ${DB_NAME}
-      DB_PORT: ${DB_PORT}
-      JWT_SECRET: ${JWT_SECRET}
-      PORT: 3008
+    container_name: users-user-update-service
+    env_file:
+      - ./.env
+    restart: on-failure
+    depends_on:
+      - mysql-db
     ports:
       - "3008:3008"
-    depends_on:
-      mysql-db:
-        condition: service_healthy
-    restart: on-failure
+    environment:
+      DB_HOST:     "${DB_HOST}"
+      DB_PORT:     "${DB_PORT}"
+      DB_USER:     "${DB_USER}"
+      DB_PASSWORD: "${DB_PASSWORD}"
+      DB_NAME:     "${DB_NAME}"
+      JWT_SECRET:  "${JWT_SECRET}"
+      PORT:        3008
     networks:
       - users_network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3008"]
-      interval: 5s
-      timeout: 3s
-      retries: 3
 
   user-delete-service:
+    build:
+      context: ./delete-user-service
+      dockerfile: Dockerfile
     image: keylet30/users-wedding:user-delete
-    environment:
-      DB_HOST: ${DB_HOST}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME: ${DB_NAME}
-      DB_PORT: ${DB_PORT}
-      JWT_SECRET: ${JWT_SECRET}
-      PORT: 3009
+    container_name: users-user-delete-service
+    env_file:
+      - ./.env
+    restart: on-failure
+    depends_on:
+      - mysql-db
     ports:
       - "3009:3009"
-    depends_on:
-      mysql-db:
-        condition: service_healthy
-    restart: on-failure
+    environment:
+      DB_HOST:     "${DB_HOST}"
+      DB_PORT:     "${DB_PORT}"
+      DB_USER:     "${DB_USER}"
+      DB_PASSWORD: "${DB_PASSWORD}"
+      DB_NAME:     "${DB_NAME}"
+      JWT_SECRET:  "${JWT_SECRET}"
+      PORT:        3009
     networks:
       - users_network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3009"]
-      interval: 5s
-      timeout: 3s
-      retries: 3
 
   user-get-service:
+    build:
+      context: ./get-user-service
+      dockerfile: Dockerfile
     image: keylet30/users-wedding:user-get
-    environment:
-      DB_HOST: ${DB_HOST}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME: ${DB_NAME}
-      DB_PORT: ${DB_PORT}
-      JWT_SECRET: ${JWT_SECRET}
-      PORT: 3010
+    container_name: users-user-get-service
+    env_file:
+      - ./.env
+    restart: on-failure
+    depends_on:
+      - mysql-db
     ports:
       - "3010:3010"
-    depends_on:
-      mysql-db:
-        condition: service_healthy
-    restart: on-failure
+    environment:
+      DB_HOST:     "${DB_HOST}"
+      DB_PORT:     "${DB_PORT}"
+      DB_USER:     "${DB_USER}"
+      DB_PASSWORD: "${DB_PASSWORD}"
+      DB_NAME:     "${DB_NAME}"
+      JWT_SECRET:  "${JWT_SECRET}"
+      PORT:        3010
     networks:
       - users_network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3010"]
-      interval: 5s
-      timeout: 3s
-      retries: 3
 
   users-frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        - VITE_API_BASE_URL=${VITE_API_BASE_URL}
     image: keylet30/users-wedding:frontend
+    container_name: users-frontend
+    restart: on-failure
+    depends_on:
+      - user-registration-service
+      - user-login-service
+      - user-update-service
+      - user-delete-service
+      - user-get-service
     ports:
       - "80:80"
-    depends_on:
-      user-registration-service:
-        condition: service_healthy
-      user-login-service:
-        condition: service_healthy
-      user-update-service:
-        condition: service_healthy
-      user-delete-service:
-        condition: service_healthy
-      user-get-service:
-        condition: service_healthy
-    restart: on-failure
+    volumes:
+      # Montaje con permiso de escritura para que nginx-entrypoint pueda ajustarlo
+      - ./frontend/nginx.conf:/etc/nginx/conf.d/default.conf
     networks:
       - users_network
 
