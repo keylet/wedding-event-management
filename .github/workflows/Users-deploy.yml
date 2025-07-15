@@ -1,9 +1,10 @@
-# .github/workflows/deploy.yml
+# .github/workflows/Users-deploy.yml
 name: Users Deploy
 
 on:
   push:
-    branches: [ qa ]
+    branches:
+      - qa
     paths:
       - "Users/frontend/**"
       - "Users/user-registration-service/**"
@@ -34,44 +35,50 @@ jobs:
 
       - name: Build & push user-registration-service
         run: |
-          docker build -t $DOCKERHUB_REPO:user-registration \
-                       -f Users/user-registration-service/Dockerfile \
-                       Users/user-registration-service
+          docker build \
+            -t $DOCKERHUB_REPO:user-registration \
+            -f Users/user-registration-service/Dockerfile \
+            Users/user-registration-service
           docker push $DOCKERHUB_REPO:user-registration
 
       - name: Build & push user-login-service
         run: |
-          docker build -t $DOCKERHUB_REPO:user-login \
-                       -f Users/login-service/Dockerfile \
-                       Users/login-service
+          docker build \
+            -t $DOCKERHUB_REPO:user-login \
+            -f Users/login-service/Dockerfile \
+            Users/login-service
           docker push $DOCKERHUB_REPO:user-login
 
       - name: Build & push user-update-service
         run: |
-          docker build -t $DOCKERHUB_REPO:user-update \
-                       -f Users/update-user-service/Dockerfile \
-                       Users/update-user-service
+          docker build \
+            -t $DOCKERHUB_REPO:user-update \
+            -f Users/update-user-service/Dockerfile \
+            Users/update-user-service
           docker push $DOCKERHUB_REPO:user-update
 
       - name: Build & push user-delete-service
         run: |
-          docker build -t $DOCKERHUB_REPO:user-delete \
-                       -f Users/delete-user-service/Dockerfile \
-                       Users/delete-user-service
+          docker build \
+            -t $DOCKERHUB_REPO:user-delete \
+            -f Users/delete-user-service/Dockerfile \
+            Users/delete-user-service
           docker push $DOCKERHUB_REPO:user-delete
 
       - name: Build & push user-get-service
         run: |
-          docker build -t $DOCKERHUB_REPO:user-get \
-                       -f Users/get-user-service/Dockerfile \
-                       Users/get-user-service
+          docker build \
+            -t $DOCKERHUB_REPO:user-get \
+            -f Users/get-user-service/Dockerfile \
+            Users/get-user-service
           docker push $DOCKERHUB_REPO:user-get
 
       - name: Build & push frontend
         run: |
-          docker build -t $DOCKERHUB_REPO:frontend \
-                       -f Users/frontend/Dockerfile \
-                       Users/frontend
+          docker build \
+            -t $DOCKERHUB_REPO:frontend \
+            -f Users/frontend/Dockerfile \
+            Users/frontend
           docker push $DOCKERHUB_REPO:frontend
 
   deploy:
@@ -88,9 +95,9 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-            cd ~/wedding-event-management/Users
+            cd ~/wedding-event-management
             git fetch origin qa
             git reset --hard origin/qa
-            docker-compose pull
-            docker-compose up -d --build --remove-orphans
+            docker-compose -f Users/docker-compose.yml pull
+            docker-compose -f Users/docker-compose.yml up -d --build --remove-orphans
           EOF
