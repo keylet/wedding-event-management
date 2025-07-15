@@ -85,40 +85,4 @@ jobs:
           username:         ${{ secrets.EC2_USER }}
           key:              ${{ secrets.EC2_SSH_KEY }}
           port:             22
-          timeout:          120s
-          command_timeout:  600s
-          envs: |
-            GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
-          script: |
-            set -e
-
-            # 1. Clona o actualiza tu repo
-            if [ -d ~/wedding-event-management ]; then
-              cd ~/wedding-event-management
-              git fetch origin qa
-              git reset --hard origin/qa
-            else
-              git clone --branch qa \
-                https://x-access-token:$GITHUB_TOKEN@github.com/keylet/wedding-event-management.git \
-                ~/wedding-event-management
-            fi
-
-            # 2. Entra donde está docker-compose.yml
-            cd ~/wedding-event-management/Users
-
-            # 3. Reconstruye tu .env
-            cat > .env <<EOF
-            DB_HOST=${{ secrets.DB_HOST }}
-            DB_USER=${{ secrets.DB_USER }}
-            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            DB_NAME=${{ secrets.DB_NAME }}
-            DB_PORT=${{ secrets.DB_PORT }}
-            MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}
-            MYSQL_ALLOW_EMPTY_PASSWORD=${{ secrets.MYSQL_ALLOW_EMPTY_PASSWORD }}
-            JWT_SECRET=${{ secrets.JWT_SECRET }}
-            VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
-            EOF
-
-            # 4. Pull y up con el plugin moderno
-            docker compose pull
-            docker compose up -d
+          timeout:
