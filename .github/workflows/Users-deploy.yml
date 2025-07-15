@@ -81,12 +81,12 @@ jobs:
       - name: SSH & Docker-Compose deploy
         uses: appleboy/ssh-action@v0.1.6
         with:
-          host:            ${{ secrets.EC2_HOST }}
-          username:        ${{ secrets.EC2_USER }}
-          key:             ${{ secrets.EC2_SSH_KEY }}
-          port:            22
-          timeout:         120
-          command_timeout: 600
+          host:             ${{ secrets.EC2_HOST }}
+          username:         ${{ secrets.EC2_USER }}
+          key:              ${{ secrets.EC2_SSH_KEY }}
+          port:             22
+          timeout:          120s
+          command_timeout:  600s
           script: |
             set -e
             # Navega al directorio remoto donde está tu docker-compose.yml
