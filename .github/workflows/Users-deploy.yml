@@ -1,5 +1,5 @@
 # .github/workflows/deploy.yml
-name: "🚀 CI/CD Pipeline"
+name: Users Deploy
 
 on:
   push:
