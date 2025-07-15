@@ -3,17 +3,16 @@ name: Users Deploy
 
 on:
   push:
-    branches:
-      - qa
+    branches: [ qa ]
     paths:
       - "Users/frontend/**"
       - "Users/user-registration-service/**"
-      - "Users/user-login-service/**"
-      - "Users/user-update-service/**"
-      - "Users/user-delete-service/**"
-      - "Users/user-get-service/**"
+      - "Users/login-service/**"
+      - "Users/update-user-service/**"
+      - "Users/delete-user-service/**"
+      - "Users/get-user-service/**"
       - "Users/docker-compose.yml"
-      - ".github/workflows/Users-deploy.yml"
+      - ".github/workflows/deploy.yml"
 
 env:
   DOCKERHUB_REPO: keylet30/users-wedding
@@ -35,50 +34,44 @@ jobs:
 
       - name: Build & push user-registration-service
         run: |
-          docker build \
-            -t $DOCKERHUB_REPO:user-registration \
-            -f Users/user-registration-service/Dockerfile \
-            Users/user-registration-service
+          docker build -t $DOCKERHUB_REPO:user-registration \
+                       -f Users/user-registration-service/Dockerfile \
+                       Users/user-registration-service
           docker push $DOCKERHUB_REPO:user-registration
 
       - name: Build & push user-login-service
         run: |
-          docker build \
-            -t $DOCKERHUB_REPO:user-login \
-            -f Users/user-login-service/Dockerfile \
-            Users/user-login-service
+          docker build -t $DOCKERHUB_REPO:user-login \
+                       -f Users/login-service/Dockerfile \
+                       Users/login-service
           docker push $DOCKERHUB_REPO:user-login
 
       - name: Build & push user-update-service
         run: |
-          docker build \
-            -t $DOCKERHUB_REPO:user-update \
-            -f Users/user-update-service/Dockerfile \
-            Users/user-update-service
+          docker build -t $DOCKERHUB_REPO:user-update \
+                       -f Users/update-user-service/Dockerfile \
+                       Users/update-user-service
           docker push $DOCKERHUB_REPO:user-update
 
       - name: Build & push user-delete-service
         run: |
-          docker build \
-            -t $DOCKERHUB_REPO:user-delete \
-            -f Users/user-delete-service/Dockerfile \
-            Users/user-delete-service
+          docker build -t $DOCKERHUB_REPO:user-delete \
+                       -f Users/delete-user-service/Dockerfile \
+                       Users/delete-user-service
           docker push $DOCKERHUB_REPO:user-delete
 
       - name: Build & push user-get-service
         run: |
-          docker build \
-            -t $DOCKERHUB_REPO:user-get \
-            -f Users/user-get-service/Dockerfile \
-            Users/user-get-service
+          docker build -t $DOCKERHUB_REPO:user-get \
+                       -f Users/get-user-service/Dockerfile \
+                       Users/get-user-service
           docker push $DOCKERHUB_REPO:user-get
 
       - name: Build & push frontend
         run: |
-          docker build \
-            -t $DOCKERHUB_REPO:frontend \
-            -f Users/frontend/Dockerfile \
-            Users/frontend
+          docker build -t $DOCKERHUB_REPO:frontend \
+                       -f Users/frontend/Dockerfile \
+                       Users/frontend
           docker push $DOCKERHUB_REPO:frontend
 
   deploy:
