@@ -30,17 +30,14 @@ jobs:
 
       - name: Deploy on EC2
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           ssh -i ~/.ssh/id_rsa "${{ secrets.EC2_USER }}@${{ secrets.PROVINCES_HOST }}" <<EOF
             set -e
 
-            # Variables
-            TOKEN="\$GH_TOKEN"
-            REPO_URL="https://x-access-token:\${TOKEN}@github.com/keylet30/wedding-event-management.git"
             REMOTE_DIR="\$HOME/Provinces-Locations"
+            REPO_URL="https://\${PAT_TOKEN}@github.com/keylet30/wedding-event-management.git"
 
-            # Clone if needed
             if [ ! -d "\$REMOTE_DIR/.git" ]; then
               git clone "\$REPO_URL" "\$REMOTE_DIR"
             fi
@@ -50,7 +47,6 @@ jobs:
             git checkout qa
             git pull origin qa
 
-            # Pull & restart via Docker Compose
             sudo docker compose pull
             sudo docker compose up -d
           EOF
