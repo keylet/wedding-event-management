@@ -9,8 +9,9 @@ env:
 
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest
     name: Build & Push Docker images
+    runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -72,9 +73,10 @@ jobs:
             VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
 
   deploy:
+    name: Deploy to EC2
     runs-on: ubuntu-latest
     needs: build-and-push
-    name: SSH & Deploy to EC2
+
     steps:
       - name: SSH & Deploy
         uses: appleboy/ssh-action@v0.1.6
@@ -101,12 +103,12 @@ jobs:
                 ~/wedding-event-management
             fi
 
-            # 2. Entra donde está docker-compose.yml
+            # 2. Ve al directorio Users donde está docker-compose.yml
             cd ~/wedding-event-management/Users
 
-            # 3. Reconstruye tu .env
+            # 3. Reconstruye tu .env (DB_HOST hardcodeado)
             cat > .env <<EOF
-            DB_HOST=${{ secrets.DB_HOST }}
+            DB_HOST=mysql-db
             DB_USER=${{ secrets.DB_USER }}
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             DB_NAME=${{ secrets.DB_NAME }}
@@ -117,7 +119,7 @@ jobs:
             VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
             EOF
 
-            # 4. Detén y elimina viejos, luego pull y up
+            # 4. Detén contenedores huérfanos, actualiza y levanta
             docker compose down --remove-orphans
             docker compose pull
             docker compose up -d
