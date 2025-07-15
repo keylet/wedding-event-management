@@ -12,7 +12,8 @@ on:
       - "Users/user-update-service/**"
       - "Users/user-delete-service/**"
       - "Users/user-get-service/**"
-      - "docker-compose.yml"
+      - "Users/docker-compose.yml"
+      - ".github/workflows/Users-deploy.yml"
 
 env:
   DOCKERHUB_REPO: keylet30/users-wedding
