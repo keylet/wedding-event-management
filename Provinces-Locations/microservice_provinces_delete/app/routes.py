@@ -2,10 +2,13 @@ from fastapi import APIRouter, HTTPException
 from .db import db
 from bson import ObjectId
 
-router = APIRouter(prefix="/provinces", tags=["provinces"])
+router = APIRouter()
+collection = db.get_collection("provinces")
 
-@router.delete("/{item_id}", status_code=204)
-async def delete_item(item_id: str):
-    res = await db.provinces.delete_one({"_id": ObjectId(item_id)})
+# DELETE en "/" + "{id}" → con prefix="/provinces" será "/provinces/{id}"
+@router.delete("/{id}", status_code=204, summary="Delete Province")
+async def delete_province(id: str):
+    res = await collection.delete_one({"_id": ObjectId(id)})
     if res.deleted_count == 0:
-        raise HTTPException(404, "Province not found")
+        raise HTTPException(404, "No encontrado")
+    return

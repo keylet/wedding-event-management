@@ -1,12 +1,15 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routes import router
 from dotenv import load_dotenv
+from .routes import router
 
 load_dotenv()
 app = FastAPI(title="microservice_provinces_delete")
 
-app.router.redirect_slashes = False
+# Permite redirección automática de slash
+# (comentario si lo habías desactivado)
+# app.router.redirect_slashes = False
 
 app.add_middleware(
     CORSMiddleware,
@@ -15,8 +18,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(router)
+# Sólo este prefijo: "/" → "/provinces/"
+app.include_router(router, prefix="/provinces", tags=["provinces"])
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app.main:app", host="0.0.0.0", port=4005, reload=True)
+    uvicorn.run(
+        app,
+        host="0.0.0.0",
+        port=int(os.getenv("PORT", 4005)),
+        reload=True,
+    )

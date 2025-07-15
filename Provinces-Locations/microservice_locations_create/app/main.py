@@ -1,12 +1,14 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routes import router
 from dotenv import load_dotenv
+from .routes import router
 
 load_dotenv()
 app = FastAPI(title="microservice_locations_create")
 
-app.router.redirect_slashes = False
+# QUITA o comenta esta línea para que FastAPI redirija automáticamente
+# app.router.redirect_slashes = False
 
 app.add_middleware(
     CORSMiddleware,
@@ -15,8 +17,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(router)
+# Con este prefix: "/" → "/locations/"
+app.include_router(router, prefix="/locations", tags=["locations"])
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app.main:app", host="0.0.0.0", port=4001, reload=True)
+    uvicorn.run(
+        app,
+        host="0.0.0.0",
+        port=int(os.getenv("PORT", 4001)),
+        reload=True,
+    )
+
+
