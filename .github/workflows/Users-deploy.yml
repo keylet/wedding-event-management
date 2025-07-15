@@ -1,89 +1,102 @@
-name: Build & Deploy to EC2
+# .github/workflows/deploy.yml
+name: "🚀 CI/CD Pipeline"
 
 on:
   push:
     branches:
       - qa
+    paths:
+      - "Users/frontend/**"
+      - "Users/user-registration-service/**"
+      - "Users/user-login-service/**"
+      - "Users/user-update-service/**"
+      - "Users/user-delete-service/**"
+      - "Users/user-get-service/**"
+      - "docker-compose.yml"
 
 env:
   DOCKERHUB_REPO: keylet30/users-wedding
-  REPO_URL:       https://github.com/keylet/wedding-event-management.git
-  DEPLOY_BASE:    /home/${{ secrets.EC2_USER }}/wedding-event-management
 
 jobs:
   build-and-push:
-    name: 📦 Build & Push Images
+    name: Build & push Docker images
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
-      - name: Build & push user-registration
+      - name: Build & push user-registration-service
         run: |
-          docker build -f Users/user-registration-service/Dockerfile \
-                       -t $DOCKERHUB_REPO:user-registration .
+          docker build \
+            -t $DOCKERHUB_REPO:user-registration \
+            -f Users/user-registration-service/Dockerfile \
+            Users/user-registration-service
           docker push $DOCKERHUB_REPO:user-registration
 
-      - name: Build & push user-login
+      - name: Build & push user-login-service
         run: |
-          docker build -f Users/login-service/Dockerfile \
-                       -t $DOCKERHUB_REPO:user-login .
+          docker build \
+            -t $DOCKERHUB_REPO:user-login \
+            -f Users/user-login-service/Dockerfile \
+            Users/user-login-service
           docker push $DOCKERHUB_REPO:user-login
 
-      - name: Build & push user-get
+      - name: Build & push user-update-service
         run: |
-          docker build -f Users/get-user-service/Dockerfile \
-                       -t $DOCKERHUB_REPO:user-get .
-          docker push $DOCKERHUB_REPO:user-get
-
-      - name: Build & push user-update
-        run: |
-          docker build -f Users/update-user-service/Dockerfile \
-                       -t $DOCKERHUB_REPO:user-update .
+          docker build \
+            -t $DOCKERHUB_REPO:user-update \
+            -f Users/user-update-service/Dockerfile \
+            Users/user-update-service
           docker push $DOCKERHUB_REPO:user-update
 
-      - name: Build & push user-delete
+      - name: Build & push user-delete-service
         run: |
-          docker build -f Users/delete-user-service/Dockerfile \
-                       -t $DOCKERHUB_REPO:user-delete .
+          docker build \
+            -t $DOCKERHUB_REPO:user-delete \
+            -f Users/user-delete-service/Dockerfile \
+            Users/user-delete-service
           docker push $DOCKERHUB_REPO:user-delete
+
+      - name: Build & push user-get-service
+        run: |
+          docker build \
+            -t $DOCKERHUB_REPO:user-get \
+            -f Users/user-get-service/Dockerfile \
+            Users/user-get-service
+          docker push $DOCKERHUB_REPO:user-get
 
       - name: Build & push frontend
         run: |
-          docker build -f Users/frontend/Dockerfile \
-                       -t $DOCKERHUB_REPO:frontend Users/frontend
+          docker build \
+            -t $DOCKERHUB_REPO:frontend \
+            -f Users/frontend/Dockerfile \
+            Users/frontend
           docker push $DOCKERHUB_REPO:frontend
 
   deploy:
-    name: 🚀 SSH & Deploy on EC2
+    name: SSH & deploy on EC2
     needs: build-and-push
     runs-on: ubuntu-latest
+
     steps:
-      - name: Start SSH agent
+      - name: Set up SSH agent
         uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
 
       - name: Deploy to EC2
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} <<EOF
-          mkdir -p "$DEPLOY_BASE"
-
-          if [ ! -d "$DEPLOY_BASE/.git" ]; then
-            git clone --branch qa $REPO_URL "$DEPLOY_BASE"
-          else
-            cd "$DEPLOY_BASE"
+          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            cd ~/wedding-event-management/Users
             git fetch origin qa
-            git checkout qa
             git reset --hard origin/qa
-          fi
-
-          cd "$DEPLOY_BASE/Users"
-          docker compose pull
-          docker compose up -d --build --remove-orphans
+            docker-compose pull
+            docker-compose up -d --build --remove-orphans
           EOF
