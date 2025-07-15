@@ -1,0 +1,16 @@
+ssh -i "C:/Users/raich/Downloads/province-locations-key.pem" ubuntu@ec2-52-7-131-155.compute-1.amazonaws.com
+
+Descargar imagenes
+
+docker pull keylet30/users-wedding:user-registration
+docker pull keylet30/users-wedding:user-update
+docker pull keylet30/users-wedding:user-login
+docker pull keylet30/users-wedding:user-get
+docker pull keylet30/users-wedding:user-delete
+docker pull keylet30/users-wedding:mysql-8.0
+docker pull keylet30/users-wedding:phpmyadmin-latest
+
+
+rm -r wedding-event-management eliminar archivo
+git clone -b qa https://github.com/keylet/wedding-event-management.git
+docker-compose up -d

@@ -1,86 +1,109 @@
-version: "3.9"
+version: "3.8"
 
 services:
-  microservice-locations-create:
-    build: ./microservice-locations-create
-    ports:
-      - "4003:4003"
-    networks:
-      - provinces-locations-network
+  mongo:
+    image: mongo:5.0
+    container_name: provinces_locations_mongo
+    restart: always
     environment:
-      - DB_HOST_L_P=${DB_HOST_L_P}
-      - DB_USER=${DB_USER_L_P}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME_L_P=${DB_NAME_L_P}
-      - DB_PORT=3306
-      - RABBITMQ_URL=rabbitmq:5672  # Corregido
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: pass
+      MONGO_INITDB_DATABASE: provinces_locations_db
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - "27017:27017"
+    networks:
+      - pl-network
 
-  microservice-locations-get:
-    build: ./microservice-locations-get
+  mongo_express:
+    image: mongo-express:latest
+    container_name: provinces_locations_mongo_express
+    restart: always
+    depends_on:
+      - mongo
+    environment:
+      ME_CONFIG_MONGODB_URL: "mongodb://admin:pass@mongo:27017/provinces_locations_db?authSource=admin"
+      ME_CONFIG_BASICAUTH_ENABLE: "false"
+    ports:
+      - "8081:8081"
+    networks:
+      - pl-network
+
+  microservice_provinces_get:
+    image: keylet30/province-locations-wedding:provinces-get
+    container_name: microservice_provinces_get
+    env_file: .env
+    depends_on:
+      - mongo
+    ports:
+      - "4004:4004"
+    networks:
+      - pl-network
+
+  microservice_provinces_delete:
+    image: keylet30/province-locations-wedding:provinces-delete
+    container_name: microservice_provinces_delete
+    env_file: .env
+    depends_on:
+      - mongo
+    ports:
+      - "4005:4005"
+    networks:
+      - pl-network
+
+  microservice_locations_get:
+    image: keylet30/province-locations-wedding:locations-get
+    container_name: microservice_locations_get
+    env_file: .env
+    depends_on:
+      - mongo
     ports:
       - "4002:4002"
     networks:
-      - provinces-locations-network
-    environment:
-      - DB_HOST_L_P=${DB_HOST_L_P}
-      - DB_USER=${DB_USER_L_P}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME_L_P=${DB_NAME_L_P}
-      - DB_PORT=3306
-      - RABBITMQ_URL=rabbitmq:5672  # Corregido
+      - pl-network
 
-  microservice-locations-delete:
-    build: ./microservice-locations-delete
-    networks:
-      - provinces-locations-network
-    environment:
-      - DB_HOST_L_P=${DB_HOST_L_P}
-      - DB_USER=${DB_USER_L_P}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME_L_P=${DB_NAME_L_P}
-      - DB_PORT=3306
-      - RABBITMQ_URL=rabbitmq:5672  # Corregido
-
-  microservice-provinces-get:
-    build: ./microservice-provinces-get
+  microservice_locations_create:
+    image: keylet30/province-locations-wedding:locations-create
+    container_name: microservice_locations_create
+    env_file: .env
+    depends_on:
+      - mongo
     ports:
       - "4001:4001"
     networks:
-      - provinces-locations-network
-    environment:
-      - DB_HOST_L_P=${DB_HOST_L_P}
-      - DB_USER=${DB_USER_L_P}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME_L_P=${DB_NAME_L_P}
-      - DB_PORT=3306
-      - RABBITMQ_URL=rabbitmq:5672  # Corregido
+      - pl-network
 
-  microservice-provinces-delete:
-    build: ./microservice-provinces-delete
+  microservice_locations_delete:
+    image: keylet30/province-locations-wedding:locations-delete
+    container_name: microservice_locations_delete
+    env_file: .env
+    depends_on:
+      - mongo
     ports:
-      - "4000:4000"
+      - "4003:4003"
     networks:
-      - provinces-locations-network
-    environment:
-      - DB_HOST_L_P=${DB_HOST_L_P}
-      - DB_USER=${DB_USER_L_P}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME_L_P=${DB_NAME_L_P}
-      - DB_PORT=3306
-      - RABBITMQ_URL=rabbitmq:5672  # Corregido
+      - pl-network
 
-  rabbitmq:
-    image: rabbitmq:3-management
-    container_name: rabbitmq
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: provinces_locations_frontend
+    depends_on:
+      - microservice_provinces_get
+      - microservice_provinces_delete
+      - microservice_locations_get
+      - microservice_locations_create
+      - microservice_locations_delete
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "8080:80"
     networks:
-      - provinces-locations-network
-    environment:
-      - RABBITMQ_DEFAULT_USER=admin
-      - RABBITMQ_DEFAULT_PASS=admin
+      - pl-network
+
+volumes:
+  mongo_data:
 
 networks:
-  provinces-locations-network:
+  pl-network:
     driver: bridge
