@@ -25,21 +25,20 @@ jobs:
         working-directory: Provinces-Locations
         run: |
           docker compose build
-          echo "${{ secrets.DOCKERHUB_TOKEN }}" \
-            | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
           docker compose push
 
       - name: Deploy on EC2
         run: |
-          ssh -i ~/.ssh/id_rsa "${{ secrets.EC2_USER }}@${{ secrets.PROVINCES_HOST }}" << 'EOF'
+          ssh -i ~/.ssh/id_rsa "${{ secrets.EC2_USER }}@${{ secrets.PROVINCES_HOST }}" <<EOF
             set -e
 
-            # Variables
-            REPO_URL="git@github.com:keylet30/wedding-event-management.git"
-            REMOTE_DIR="$HOME/Provinces-Locations"
+            # Repo URL y directorio remoto
+            REPO_URL="https://github.com/keylet30/wedding-event-management.git"
+            REMOTE_DIR="\$HOME/Provinces-Locations"
 
-            # Si no existe el código, clonarlo
-            if [ ! -d "\$REMOTE_DIR" ]; then
+            # Clonar si no existe
+            if [ ! -d "\$REMOTE_DIR/.git" ]; then
               git clone "\$REPO_URL" "\$REMOTE_DIR"
             fi
 
@@ -50,7 +49,7 @@ jobs:
             git checkout qa
             git pull origin qa
 
-            # Pull de imágenes y levanta servicios
+            # Pull de imágenes y levantar servicios
             sudo docker compose pull
             sudo docker compose up -d
           EOF
