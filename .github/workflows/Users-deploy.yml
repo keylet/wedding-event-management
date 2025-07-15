@@ -6,13 +6,8 @@ on:
     branches:
       - qa
     paths:
-      - "Users/frontend/**"
-      - "Users/user-registration-service/**"
-      - "Users/login-service/**"
-      - "Users/update-user-service/**"
-      - "Users/delete-user-service/**"
-      - "Users/get-user-service/**"
-      - "Users/docker-compose.yml"
+      - "Users/**"
+      - "docker-compose.yml"
       - ".github/workflows/Users-deploy.yml"
 
 env:
@@ -24,8 +19,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
@@ -89,12 +83,15 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-            # Vamos a la carpeta donde está tu proyecto y tu .git
-            cd ~/wedding-event-management/Users
-            # Aseguramos la rama QA limpia
+            # 1) Vamos al root del repo (aquí sí está .git)
+            cd ~/wedding-event-management
+            # 2) Sincronizamos QA
             git fetch origin qa
             git reset --hard origin/qa
-            # Levantamos con docker-compose (usa el compose en esta carpeta)
+            # 3) Límpiar imágenes antiguas (opcional)
+            docker image prune -f
+            # 4) Levantamos con docker-compose
+            #    Asumiendo que tu docker-compose.yml está en la raíz
             docker-compose pull
             docker-compose up -d --build --remove-orphans
           EOF
