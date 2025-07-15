@@ -1,5 +1,5 @@
 # Wedding-Event-Management
-# 🚀 Wedding Booking System
+# 🚀 Wedding Booking System 1
 A **microservices-based** event booking platform for **weddings**, deployed on **AWS**, using **RDS MySQL & PostgreSQL**, and **Dockerized services**.
 
 ## 📌 **Project Overview**
