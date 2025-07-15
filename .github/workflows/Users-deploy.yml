@@ -6,7 +6,6 @@ on:
 
 env:
   DOCKERHUB_REPO: keylet30/users-wedding
-  GIT_CLONE_URL: git@github.com:keylet/wedding-event-management.git
 
 jobs:
   build-and-push:
@@ -88,22 +87,27 @@ jobs:
           port:             22
           timeout:          120s
           command_timeout:  600s
+          # Pasamos GITHUB_TOKEN para clonar el repo vía HTTPS
+          envs: |
+            GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
           script: |
             set -e
 
-            # Clone or update the repo on EC2
+            # 1. Clona o actualiza la rama qa vía HTTPS + token
             if [ -d ~/wedding-event-management ]; then
               cd ~/wedding-event-management
               git fetch origin qa
               git reset --hard origin/qa
             else
-              git clone --branch qa "${GIT_CLONE_URL}" ~/wedding-event-management
+              git clone --branch qa \
+                https://x-access-token:$GITHUB_TOKEN@github.com/keylet/wedding-event-management.git \
+                ~/wedding-event-management
             fi
 
-            # Go into the Users directory where docker-compose.yml lives
+            # 2. Entra donde está docker-compose.yml
             cd ~/wedding-event-management/Users
 
-            # Rebuild .env from secrets
+            # 3. Reconstruye tu .env
             cat > .env <<EOF
             DB_HOST=${{ secrets.DB_HOST }}
             DB_USER=${{ secrets.DB_USER }}
@@ -116,6 +120,6 @@ jobs:
             VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
             EOF
 
-            # Pull new images and (re)deploy containers
+            # 4. Despliega
             docker-compose pull
             docker-compose up -d --build
