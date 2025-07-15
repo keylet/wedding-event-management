@@ -35,24 +35,29 @@ jobs:
             docker stop provinces-locations || true
             docker rm provinces-locations  || true
 
-            # Run provinces-locations
+            # Run provinces-locations with MongoDB env vars
             docker run -d \
               --name provinces-locations \
               -p 4002:4002 \
-              -e MONGO_URI="mongodb://${{ secrets.MONGO_DB_USER }}:${{ secrets.MONGO_DB_PASSWORD }}@${{ secrets.MONGO_DB_HOST }}:${{ secrets.MONGO_DB_PORT }}/${{ secrets.MONGO_DB_NAME }}?authSource=admin" \
+              -e MONGO_DB_HOST="${{ secrets.MONGO_DB_HOST }}" \
+              -e MONGO_DB_PORT="${{ secrets.MONGO_DB_PORT }}" \
+              -e MONGO_DB_USER="${{ secrets.MONGO_DB_USER }}" \
+              -e MONGO_DB_PASSWORD="${{ secrets.MONGO_DB_PASSWORD }}" \
+              -e MONGO_DB_NAME="${{ secrets.MONGO_DB_NAME }}" \
               keylet30/province-locations-wedding:latest
 
             # Stop & remove old mongo-express container
             docker stop mongo-express || true
             docker rm mongo-express  || true
 
-            # Run mongo-express
+            # Run mongo-express alongside
             docker run -d \
               --name mongo-express \
               -p 8081:8081 \
-              -e ME_CONFIG_MONGODB_ADMINUSERNAME="${{ secrets.MONGO_DB_USER }}" \
-              -e ME_CONFIG_MONGODB_ADMINPASSWORD="${{ secrets.MONGO_DB_PASSWORD }}" \
               -e ME_CONFIG_MONGODB_SERVER="${{ secrets.MONGO_DB_HOST }}" \
               -e ME_CONFIG_MONGODB_PORT="${{ secrets.MONGO_DB_PORT }}" \
+              -e ME_CONFIG_MONGODB_ADMINUSERNAME="${{ secrets.MONGO_DB_USER }}" \
+              -e ME_CONFIG_MONGODB_ADMINPASSWORD="${{ secrets.MONGO_DB_PASSWORD }}" \
+              -e ME_CONFIG_MONGODB_AUTH_DATABASE="${{ secrets.MONGO_DB_NAME }}" \
               mongo-express:latest
           EOF
