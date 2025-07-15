@@ -11,17 +11,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout Actions code
         uses: actions/checkout@v3
 
-      - name: Set up SSH key
+      - name: Set up SSH for EC2
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.PROVINCES_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H "${{ secrets.PROVINCES_HOST }}" >> ~/.ssh/known_hosts
 
-      - name: Build & push with Docker Compose
+      - name: Build & push images
         working-directory: Provinces-Locations
         run: |
           docker compose build
@@ -29,24 +29,15 @@ jobs:
           docker compose push
 
       - name: Deploy on EC2
-        env:
-          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          ssh -i ~/.ssh/id_rsa "${{ secrets.EC2_USER }}@${{ secrets.PROVINCES_HOST }}" <<EOF
+          ssh -i ~/.ssh/id_rsa "${{ secrets.EC2_USER }}@${{ secrets.PROVINCES_HOST }}" << 'EOF'
             set -e
-
-            REMOTE_DIR="\$HOME/Provinces-Locations"
-            REPO_URL="https://\${PAT_TOKEN}@github.com/keylet30/wedding-event-management.git"
-
-            if [ ! -d "\$REMOTE_DIR/.git" ]; then
-              git clone "\$REPO_URL" "\$REMOTE_DIR"
-            fi
-
-            cd "\$REMOTE_DIR"
+            cd ~/Provinces-Locations      # Ya debe existir y estar apuntando al repo
             git fetch origin qa
             git checkout qa
-            git pull origin qa
+            git reset --hard origin/qa
 
+            # Actualiza imágenes y levanta containers
             sudo docker compose pull
             sudo docker compose up -d
           EOF
