@@ -1,24 +1,36 @@
-# .github/workflows/Users-deploy.yml
-name: Users Deploy
+name: Deploy Users Services
 
 on:
   push:
-    branches: [ qa ]
-    paths:
-      - "Users/**"
-      - "Users/docker-compose.yml"
-      - ".github/workflows/Users-deploy.yml"
+    branches:
+      - qa
 
 env:
   DOCKERHUB_REPO: keylet30/users-wedding
 
 jobs:
   build-and-push:
-    name: Build & push Docker images
+    name: Build & Push Docker images
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        service:
+          - name: user-registration
+            path: user-registration-service
+          - name: user-login
+            path: login-service
+          - name: user-update
+            path: update-user-service
+          - name: user-delete
+            path: delete-user-service
+          - name: user-get
+            path: get-user-service
+          - name: frontend
+            path: frontend
+
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Log in to Docker Hub
@@ -27,80 +39,45 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build & push user-registration-service
-        run: |
-          docker build -t $DOCKERHUB_REPO:user-registration \
-                       -f Users/user-registration-service/Dockerfile \
-                       Users/user-registration-service
-          docker push $DOCKERHUB_REPO:user-registration
-
-      - name: Build & push user-login-service
-        run: |
-          docker build -t $DOCKERHUB_REPO:user-login \
-                       -f Users/login-service/Dockerfile \
-                       Users/login-service
-          docker push $DOCKERHUB_REPO:user-login
-
-      - name: Build & push user-update-service
-        run: |
-          docker build -t $DOCKERHUB_REPO:user-update \
-                       -f Users/update-user-service/Dockerfile \
-                       Users/update-user-service
-          docker push $DOCKERHUB_REPO:user-update
-
-      - name: Build & push user-delete-service
-        run: |
-          docker build -t $DOCKERHUB_REPO:user-delete \
-                       -f Users/delete-user-service/Dockerfile \
-                       Users/delete-user-service
-          docker push $DOCKERHUB_REPO:user-delete
-
-      - name: Build & push user-get-service
-        run: |
-          docker build -t $DOCKERHUB_REPO:user-get \
-                       -f Users/get-user-service/Dockerfile \
-                       Users/get-user-service
-          docker push $DOCKERHUB_REPO:user-get
-
-      - name: Build & push frontend
-        run: |
-          docker build -t $DOCKERHUB_REPO:frontend \
-                       -f Users/frontend/Dockerfile \
-                       Users/frontend
-          docker push $DOCKERHUB_REPO:frontend
+      - name: Build & push ${{ matrix.service.name }}
+        uses: docker/build-push-action@v4
+        with:
+          context: ./${{ matrix.service.path }}
+          file: ./${{ matrix.service.path }}/Dockerfile
+          push: true
+          tags: ${{ env.DOCKERHUB_REPO }}:${{ matrix.service.name }}
+          # Solo para frontend: inyectamos la base URL
+          build-args: |
+            VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
 
   deploy:
-    name: SSH & deploy on EC2
-    needs: build-and-push
+    name: Deploy to EC2
     runs-on: ubuntu-latest
+    needs: build-and-push
 
     steps:
-      - name: Set up SSH agent
-        uses: webfactory/ssh-agent@v0.5.3
+      - name: SSH & Docker-Compose deploy
+        uses: appleboy/ssh-action@v0.1.6
         with:
-          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            set -e
+            cd ~/wedding-event-management/Provinces-Locations
 
-      - name: Deploy to EC2
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-            # Si no existe la carpeta, clonar por primera vez
-            if [ ! -d ~/wedding-event-management ]; then
-              git clone --branch qa https://github.com/KEYLET/wedding-event-management.git ~/wedding-event-management
-            fi
+            cat > .env <<EOF
+            DB_HOST=${{ secrets.DB_HOST }}
+            DB_USER=${{ secrets.DB_USER }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            DB_NAME=${{ secrets.DB_NAME }}
+            DB_PORT=${{ secrets.DB_PORT }}
+            MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}
+            MYSQL_ALLOW_EMPTY_PASSWORD=${{ secrets.MYSQL_ALLOW_EMPTY_PASSWORD }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
+            EOF
 
-            cd ~/wedding-event-management
-
-            # Actualizar código
-            git fetch origin qa
-            git reset --hard origin/qa
-
-            # Ir al folder donde está tu compose
-            cd Users
-
-            # Limpiar imágenes huérfanas (opcional)
-            docker image prune -f
-
-            # Levantar todo
             docker-compose pull
-            docker-compose up -d --build --remove-orphans
-          EOF
+            docker-compose up -d --build
