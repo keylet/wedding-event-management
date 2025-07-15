@@ -29,27 +29,28 @@ jobs:
           docker compose push
 
       - name: Deploy on EC2
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ssh -i ~/.ssh/id_rsa "${{ secrets.EC2_USER }}@${{ secrets.PROVINCES_HOST }}" <<EOF
             set -e
 
-            # Repo URL y directorio remoto
-            REPO_URL="https://github.com/keylet30/wedding-event-management.git"
+            # Variables
+            TOKEN="\$GH_TOKEN"
+            REPO_URL="https://x-access-token:\${TOKEN}@github.com/keylet30/wedding-event-management.git"
             REMOTE_DIR="\$HOME/Provinces-Locations"
 
-            # Clonar si no existe
+            # Clone if needed
             if [ ! -d "\$REMOTE_DIR/.git" ]; then
               git clone "\$REPO_URL" "\$REMOTE_DIR"
             fi
 
             cd "\$REMOTE_DIR"
-
-            # Actualizar rama qa
             git fetch origin qa
             git checkout qa
             git pull origin qa
 
-            # Pull de imágenes y levantar servicios
+            # Pull & restart via Docker Compose
             sudo docker compose pull
             sudo docker compose up -d
           EOF
