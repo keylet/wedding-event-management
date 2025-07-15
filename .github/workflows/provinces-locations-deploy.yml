@@ -3,9 +3,7 @@ name: provinces-locations-deploy
 
 on:
   push:
-    branches:
-      - main
-
+    branches: [ qa ]
 jobs:
   deploy:
     runs-on: ubuntu-latest
