@@ -25,12 +25,11 @@ jobs:
       - name: Build & push images with Docker Compose
         run: |
           # Build all services & frontend
-          docker-compose build
+          docker compose build
           # Login to Docker Hub
-          echo "${{ secrets.DOCKERHUB_TOKEN }}" \
-            | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-          # Push images (must have image: keys in docker-compose.yml)
-          docker-compose push
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+          # Push images (services must define `image:` in docker-compose.yml)
+          docker compose push
 
       - name: Deploy to EC2 via Docker Compose
         run: |
@@ -43,6 +42,6 @@ jobs:
             git pull origin qa
 
             # Traer nuevas imágenes y recrear servicios
-            docker-compose pull
-            docker-compose up -d
+            docker compose pull
+            docker compose up -d
           EOF
