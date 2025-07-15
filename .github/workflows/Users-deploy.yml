@@ -87,13 +87,12 @@ jobs:
           port:             22
           timeout:          120s
           command_timeout:  600s
-          # Pasamos GITHUB_TOKEN para clonar el repo vía HTTPS
           envs: |
             GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
           script: |
             set -e
 
-            # 1. Clona o actualiza la rama qa vía HTTPS + token
+            # 1. Clona o actualiza tu repo en EC2
             if [ -d ~/wedding-event-management ]; then
               cd ~/wedding-event-management
               git fetch origin qa
@@ -104,7 +103,7 @@ jobs:
                 ~/wedding-event-management
             fi
 
-            # 2. Entra donde está docker-compose.yml
+            # 2. Ve al directorio donde está docker-compose.yml
             cd ~/wedding-event-management/Users
 
             # 3. Reconstruye tu .env
@@ -120,6 +119,7 @@ jobs:
             VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
             EOF
 
-            # 4. Despliega
+            # 4. Sólo pull y up, sin rebuild
             docker-compose pull
-            docker-compose up -d --build
+            docker-compose up -d
+
