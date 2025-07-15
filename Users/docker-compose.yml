@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   mysql-db:
     image: mysql:8.0
@@ -46,6 +48,8 @@ services:
       - mysql-db
     env_file:
       - ./.env
+    environment:
+      - PORT=3006
     ports:
       - "3006:3006"
     networks:
@@ -62,6 +66,8 @@ services:
       - mysql-db
     env_file:
       - ./.env
+    environment:
+      - PORT=3007
     ports:
       - "3007:3007"
     networks:
@@ -78,6 +84,8 @@ services:
       - mysql-db
     env_file:
       - ./.env
+    environment:
+      - PORT=3008
     ports:
       - "3008:3008"
     networks:
@@ -94,6 +102,8 @@ services:
       - mysql-db
     env_file:
       - ./.env
+    environment:
+      - PORT=3009
     ports:
       - "3009:3009"
     networks:
@@ -110,8 +120,10 @@ services:
       - mysql-db
     env_file:
       - ./.env
+    environment:
+      - PORT=3010
     ports:
-      - "3010:3010"        # <-- aquí debe ser una lista, no una cadena sola
+      - "3010:3010"
     networks:
       - users_network
 
