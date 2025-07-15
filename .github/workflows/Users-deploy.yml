@@ -12,8 +12,7 @@ on:
       - "Users/user-update-service/**"
       - "Users/user-delete-service/**"
       - "Users/user-get-service/**"
-      - "Users/docker-compose.yml"
-      - ".github/workflows/Users-deploy.yml"
+      - "docker-compose.yml"
 
 env:
   DOCKERHUB_REPO: keylet30/users-wedding
@@ -30,8 +29,8 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build & push user-registration-service
         run: |
