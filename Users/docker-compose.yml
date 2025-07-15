@@ -13,8 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
@@ -103,10 +102,10 @@ jobs:
                 ~/wedding-event-management
             fi
 
-            # 2. Entra donde está docker-compose.yml
-            cd ~/wedding-event-management/Users
+            # 2. Ve al directorio raíz donde está docker-compose.yml
+            cd ~/wedding-event-management
 
-            # 3. Reconstruye tu .env (DB_HOST hardcodeado al nombre de servicio)
+            # 3. Reconstruye tu .env (DB_HOST hardcodeado)
             cat > .env <<EOF
             DB_HOST=mysql-db
             DB_USER=${{ secrets.DB_USER }}
@@ -119,7 +118,7 @@ jobs:
             VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
             EOF
 
-            # 4. Detén orphans, tira pull y levanta sin rebuild
+            # 4. Detén orphans, pull y up
             docker compose down --remove-orphans
             docker compose pull
             docker compose up -d
