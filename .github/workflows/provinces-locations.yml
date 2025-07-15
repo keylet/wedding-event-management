@@ -13,7 +13,7 @@ env:
 
 jobs:
   build-and-push:
-    name: Build & Push Docker images
+    name: Build, Push & Clean Intermediate Images
     runs-on: ubuntu-latest
 
     steps:
@@ -26,35 +26,50 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.PL_DOCKERHUB_TOKEN }}
 
-      - name: Build & push provinces-get
+      - name: Build, push & prune provinces-get
         run: |
           docker build -t $DOCKERHUB_REPO:provinces-get ./Provinces-Locations/microservice_provinces_get
           docker push $DOCKERHUB_REPO:provinces-get
+          docker rmi $DOCKERHUB_REPO:provinces-get
+          docker system prune -f
 
-      - name: Build & push provinces-delete
+      - name: Build, push & prune provinces-delete
         run: |
           docker build -t $DOCKERHUB_REPO:provinces-delete ./Provinces-Locations/microservice_provinces_delete
           docker push $DOCKERHUB_REPO:provinces-delete
+          docker rmi $DOCKERHUB_REPO:provinces-delete
+          docker system prune -f
 
-      - name: Build & push locations-get
+      - name: Build, push & prune locations-get
         run: |
           docker build -t $DOCKERHUB_REPO:locations-get ./Provinces-Locations/microservice_locations_get
           docker push $DOCKERHUB_REPO:locations-get
+          docker rmi $DOCKERHUB_REPO:locations-get
+          docker system prune -f
 
-      - name: Build & push locations-create
+      - name: Build, push & prune locations-create
         run: |
           docker build -t $DOCKERHUB_REPO:locations-create ./Provinces-Locations/microservice_locations_create
           docker push $DOCKERHUB_REPO:locations-create
+          docker rmi $DOCKERHUB_REPO:locations-create
+          docker system prune -f
 
-      - name: Build & push locations-delete
+      - name: Build, push & prune locations-delete
         run: |
           docker build -t $DOCKERHUB_REPO:locations-delete ./Provinces-Locations/microservice_locations_delete
           docker push $DOCKERHUB_REPO:locations-delete
+          docker rmi $DOCKERHUB_REPO:locations-delete
+          docker system prune -f
 
-      - name: Build & push frontend
+      - name: Prune all Docker data before frontend
+        run: docker system prune -af
+
+      - name: Build, push & prune frontend
         run: |
           docker build -t $DOCKERHUB_REPO:frontend ./Provinces-Locations/frontend
           docker push $DOCKERHUB_REPO:frontend
+          docker rmi $DOCKERHUB_REPO:frontend
+          docker system prune -f
 
   deploy-remote:
     name: Deploy on Remote Server
@@ -67,12 +82,12 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.PL_SSH_PRIVATE_KEY }}
 
-      - name: SSH & Deploy
+      - name: SSH & Deploy with Compose v2
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.PL_SSH_USER }}@${{ secrets.PL_SSH_HOST }} << 'EOF'
             cd ~/wedding-event-management/Provinces-Locations
 
-            # Instala Docker Compose plugin v2 si no existe
+            # Ensure Docker Compose v2 plugin is installed
             if ! docker compose version > /dev/null 2>&1; then
               sudo mkdir -p /usr/lib/docker/cli-plugins
               sudo curl -SL https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-linux-x86_64 \
@@ -80,7 +95,7 @@ jobs:
               sudo chmod +x /usr/lib/docker/cli-plugins/docker-compose
             fi
 
-            # Pull & recreate using Compose v2
+            # Pull latest images and restart stack
             docker compose pull
             docker compose up -d
           EOF
