@@ -1,17 +1,19 @@
-name: CI/CD Province-Locations
+# .github/workflows/provinces-locations.yml
+name: Deploy Provinces-Locations Services
 
 on:
   push:
+    branches: [ qa ]
     paths:
       - 'Provinces-Locations/**'
   workflow_dispatch:
 
 env:
-  IMAGE_BASE: keylet30/province-locations-wedding
+  DOCKERHUB_REPO: keylet30/province-locations-wedding
 
 jobs:
   build-and-push:
-    name: Build & Push Images
+    name: Build & Push Docker images
     runs-on: ubuntu-latest
 
     steps:
@@ -26,28 +28,28 @@ jobs:
 
       - name: Build & push provinces-get
         run: |
-          docker build -t $IMAGE_BASE:provinces-get ./Provinces-Locations/microservice_provinces_get
-          docker push $IMAGE_BASE:provinces-get
+          docker build -t $DOCKERHUB_REPO:provinces-get ./Provinces-Locations/microservice_provinces_get
+          docker push $DOCKERHUB_REPO:provinces-get
 
       - name: Build & push provinces-delete
         run: |
-          docker build -t $IMAGE_BASE:provinces-delete ./Provinces-Locations/microservice_provinces_delete
-          docker push $IMAGE_BASE:provinces-delete
+          docker build -t $DOCKERHUB_REPO:provinces-delete ./Provinces-Locations/microservice_provinces_delete
+          docker push $DOCKERHUB_REPO:provinces-delete
 
       - name: Build & push locations-get
         run: |
-          docker build -t $IMAGE_BASE:locations-get ./Provinces-Locations/microservice_locations_get
-          docker push $IMAGE_BASE:locations-get
+          docker build -t $DOCKERHUB_REPO:locations-get ./Provinces-Locations/microservice_locations_get
+          docker push $DOCKERHUB_REPO:locations-get
 
       - name: Build & push locations-create
         run: |
-          docker build -t $IMAGE_BASE:locations-create ./Provinces-Locations/microservice_locations_create
-          docker push $IMAGE_BASE:locations-create
+          docker build -t $DOCKERHUB_REPO:locations-create ./Provinces-Locations/microservice_locations_create
+          docker push $DOCKERHUB_REPO:locations-create
 
       - name: Build & push locations-delete
         run: |
-          docker build -t $IMAGE_BASE:locations-delete ./Provinces-Locations/microservice_locations_delete
-          docker push $IMAGE_BASE:locations-delete
+          docker build -t $DOCKERHUB_REPO:locations-delete ./Provinces-Locations/microservice_locations_delete
+          docker push $DOCKERHUB_REPO:locations-delete
 
   deploy-remote:
     name: Deploy on Remote Server
