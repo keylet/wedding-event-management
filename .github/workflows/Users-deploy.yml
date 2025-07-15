@@ -66,4 +66,45 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: ./Users/frontend
-          file:    ./Users/fronte
+          file:    ./Users/frontend/Dockerfile
+          push:    true
+          tags:    ${{ env.DOCKERHUB_REPO }}:frontend
+          build-args: |
+            VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
+
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+    needs: build-and-push
+
+    steps:
+      - name: SSH & Docker-Compose deploy
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host:            ${{ secrets.EC2_HOST }}
+          username:        ${{ secrets.EC2_USER }}
+          key:             ${{ secrets.EC2_SSH_KEY }}
+          port:            22
+          timeout:         120
+          command_timeout: 600
+          script: |
+            set -e
+            # Navega al directorio remoto donde está tu docker-compose.yml
+            cd ~/wedding-event-management/Users
+
+            # Reconstruye el .env con tus secrets
+            cat > .env <<EOF
+            DB_HOST=${{ secrets.DB_HOST }}
+            DB_USER=${{ secrets.DB_USER }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            DB_NAME=${{ secrets.DB_NAME }}
+            DB_PORT=${{ secrets.DB_PORT }}
+            MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}
+            MYSQL_ALLOW_EMPTY_PASSWORD=${{ secrets.MYSQL_ALLOW_EMPTY_PASSWORD }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
+            EOF
+
+            # Actualiza imágenes y (re)levanta los contenedores
+            docker-compose pull
+            docker-compose up -d --build
