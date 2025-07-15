@@ -12,7 +12,7 @@ on:
       - "Users/delete-user-service/**"
       - "Users/get-user-service/**"
       - "Users/docker-compose.yml"
-      - ".github/workflows/deploy.yml"
+      - ".github/workflows/Users-deploy.yml"
 
 env:
   DOCKERHUB_REPO: keylet30/users-wedding
