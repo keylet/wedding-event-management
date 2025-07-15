@@ -57,4 +57,33 @@ jobs:
         run: |
           docker build -f Users/frontend/Dockerfile \
                        -t $DOCKERHUB_REPO:frontend Users/frontend
-          docker
+          docker push $DOCKERHUB_REPO:frontend
+
+  deploy:
+    name: 🚀 SSH & Deploy on EC2
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Start SSH agent
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+
+      - name: Deploy to EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} <<EOF
+          mkdir -p "$DEPLOY_BASE"
+
+          if [ ! -d "$DEPLOY_BASE/.git" ]; then
+            git clone --branch qa $REPO_URL "$DEPLOY_BASE"
+          else
+            cd "$DEPLOY_BASE"
+            git fetch origin qa
+            git checkout qa
+            git reset --hard origin/qa
+          fi
+
+          cd "$DEPLOY_BASE/Users"
+          docker compose pull
+          docker compose up -d --build --remove-orphans
+          EOF
