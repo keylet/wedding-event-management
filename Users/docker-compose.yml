@@ -103,8 +103,8 @@ jobs:
                 ~/wedding-event-management
             fi
 
-            # 2. Ve al directorio raíz donde está tu docker-compose.yml
-            cd ~/wedding-event-management
+            # 2. Ve al directorio Users donde está docker-compose.yml
+            cd ~/wedding-event-management/Users
 
             # 3. Reconstruye tu .env (DB_HOST hardcodeado)
             cat > .env <<EOF
@@ -119,7 +119,7 @@ jobs:
             VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
             EOF
 
-            # 4. Detén orphans, pull y up
+            # 4. Detén contenedores huérfanos, actualiza y levanta
             docker compose down --remove-orphans
             docker compose pull
             docker compose up -d
