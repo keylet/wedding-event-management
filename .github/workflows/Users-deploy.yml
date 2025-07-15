@@ -3,11 +3,10 @@ name: Users Deploy
 
 on:
   push:
-    branches:
-      - qa
+    branches: [ qa ]
     paths:
       - "Users/**"
-      - "docker-compose.yml"
+      - "Users/docker-compose.yml"
       - ".github/workflows/Users-deploy.yml"
 
 env:
@@ -19,7 +18,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
@@ -83,15 +83,24 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-            # 1) Vamos al root del repo (aquí sí está .git)
+            # Si no existe la carpeta, clonar por primera vez
+            if [ ! -d ~/wedding-event-management ]; then
+              git clone --branch qa https://github.com/KEYLET/wedding-event-management.git ~/wedding-event-management
+            fi
+
             cd ~/wedding-event-management
-            # 2) Sincronizamos QA
+
+            # Actualizar código
             git fetch origin qa
             git reset --hard origin/qa
-            # 3) Límpiar imágenes antiguas (opcional)
+
+            # Ir al folder donde está tu compose
+            cd Users
+
+            # Limpiar imágenes huérfanas (opcional)
             docker image prune -f
-            # 4) Levantamos con docker-compose
-            #    Asumiendo que tu docker-compose.yml está en la raíz
+
+            # Levantar todo
             docker-compose pull
             docker-compose up -d --build --remove-orphans
           EOF
