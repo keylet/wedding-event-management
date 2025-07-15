@@ -86,9 +86,7 @@ services:
       - pl-network
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    image: keylet30/province-locations-wedding:frontend
     container_name: provinces_locations_frontend
     depends_on:
       - microservice_provinces_get
