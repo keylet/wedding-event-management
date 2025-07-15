@@ -2,8 +2,7 @@ name: Deploy Users Services
 
 on:
   push:
-    branches:
-      - qa
+    branches: [ qa ]
 
 env:
   DOCKERHUB_REPO: keylet30/users-wedding
@@ -26,48 +25,48 @@ jobs:
       - name: Build & push user-registration-service
         uses: docker/build-push-action@v4
         with:
-          context: ./Users/user-registration-service
-          file:    ./Users/user-registration-service/Dockerfile
+          context: ./user-registration-service
+          file:    ./user-registration-service/Dockerfile
           push:    true
           tags:    ${{ env.DOCKERHUB_REPO }}:user-registration
 
       - name: Build & push login-service
         uses: docker/build-push-action@v4
         with:
-          context: ./Users/login-service
-          file:    ./Users/login-service/Dockerfile
+          context: ./login-service
+          file:    ./login-service/Dockerfile
           push:    true
           tags:    ${{ env.DOCKERHUB_REPO }}:user-login
 
       - name: Build & push update-user-service
         uses: docker/build-push-action@v4
         with:
-          context: ./Users/update-user-service
-          file:    ./Users/update-user-service/Dockerfile
+          context: ./update-user-service
+          file:    ./update-user-service/Dockerfile
           push:    true
           tags:    ${{ env.DOCKERHUB_REPO }}:user-update
 
       - name: Build & push delete-user-service
         uses: docker/build-push-action@v4
         with:
-          context: ./Users/delete-user-service
-          file:    ./Users/delete-user-service/Dockerfile
+          context: ./delete-user-service
+          file:    ./delete-user-service/Dockerfile
           push:    true
           tags:    ${{ env.DOCKERHUB_REPO }}:user-delete
 
       - name: Build & push get-user-service
         uses: docker/build-push-action@v4
         with:
-          context: ./Users/get-user-service
-          file:    ./Users/get-user-service/Dockerfile
+          context: ./get-user-service
+          file:    ./get-user-service/Dockerfile
           push:    true
           tags:    ${{ env.DOCKERHUB_REPO }}:user-get
 
       - name: Build & push frontend
         uses: docker/build-push-action@v4
         with:
-          context: ./Users/frontend
-          file:    ./Users/frontend/Dockerfile
+          context: ./frontend
+          file:    ./frontend/Dockerfile
           push:    true
           tags:    ${{ env.DOCKERHUB_REPO }}:frontend
           build-args: |
@@ -82,15 +81,19 @@ jobs:
       - name: SSH & Docker-Compose deploy
         uses: appleboy/ssh-action@v0.1.6
         with:
-          host:     ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key:      ${{ secrets.EC2_SSH_KEY }}
-          port:     22
+          host:            ${{ secrets.EC2_HOST }}
+          username:        ${{ secrets.EC2_USER }}
+          key:             ${{ secrets.EC2_SSH_KEY }}
+          port:            22
+          timeout:         120
+          command_timeout: 600
           script: |
             set -e
-            # Ajusta la ruta remota si es distinta
-            cd ~/wedding-event-management/Users
 
+            # Ve al directorio donde está tu docker-compose.yml
+            cd ~/wedding-event-management
+
+            # Reconstruye el .env con tus secrets
             cat > .env <<EOF
             DB_HOST=${{ secrets.DB_HOST }}
             DB_USER=${{ secrets.DB_USER }}
@@ -103,5 +106,6 @@ jobs:
             VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
             EOF
 
+            # Actualiza imágenes y (re)levanta los contenedores
             docker-compose pull
             docker-compose up -d --build
