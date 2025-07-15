@@ -9,7 +9,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: production
 
     steps:
       - name: Checkout code
@@ -22,28 +21,36 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H "${{ secrets.PROVINCES_HOST }}" >> ~/.ssh/known_hosts
 
-      - name: Build & push images with Docker Compose
+      - name: Build & push with Docker Compose
         working-directory: Provinces-Locations
         run: |
-          # Build all services & frontend
           docker compose build
-          # Login to Docker Hub
           echo "${{ secrets.DOCKERHUB_TOKEN }}" \
             | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-          # Push images (must have image: keys in docker-compose.yml)
           docker compose push
 
-      - name: Deploy to EC2 via Docker Compose
+      - name: Deploy on EC2
         run: |
           ssh -i ~/.ssh/id_rsa "${{ secrets.EC2_USER }}@${{ secrets.PROVINCES_HOST }}" << 'EOF'
-            cd ~/provinces-locations   # Ajusta si tu carpeta remota tiene otro nombre/capitalización
+            set -e
 
-            # Actualizar código
-            git fetch
+            # Variables
+            REPO_URL="git@github.com:keylet30/wedding-event-management.git"
+            REMOTE_DIR="$HOME/Provinces-Locations"
+
+            # Si no existe el código, clonarlo
+            if [ ! -d "\$REMOTE_DIR" ]; then
+              git clone "\$REPO_URL" "\$REMOTE_DIR"
+            fi
+
+            cd "\$REMOTE_DIR"
+
+            # Actualizar rama qa
+            git fetch origin qa
             git checkout qa
             git pull origin qa
 
-            # Traer nuevas imágenes y recrear servicios
-            docker compose pull
-            docker compose up -d
+            # Pull de imágenes y levanta servicios
+            sudo docker compose pull
+            sudo docker compose up -d
           EOF
