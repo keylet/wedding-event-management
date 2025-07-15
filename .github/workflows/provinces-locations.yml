@@ -51,6 +51,11 @@ jobs:
           docker build -t $DOCKERHUB_REPO:locations-delete ./Provinces-Locations/microservice_locations_delete
           docker push $DOCKERHUB_REPO:locations-delete
 
+      - name: Build & push frontend
+        run: |
+          docker build -t $DOCKERHUB_REPO:frontend ./Provinces-Locations/frontend
+          docker push $DOCKERHUB_REPO:frontend
+
   deploy-remote:
     name: Deploy on Remote Server
     needs: build-and-push
@@ -62,19 +67,20 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.PL_SSH_PRIVATE_KEY }}
 
-      - name: Copy .env to remote
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.PL_SSH_USER }}@${{ secrets.PL_SSH_HOST }} \
-            "cat > ~/wedding-event-management/Provinces-Locations/.env" << 'EOF'
-          MONGO_URI=${{ secrets.PL_MONGO_URI }}
-          MONGO_DATABASE=provinces_locations_db
-          PORT=4002
-          EOF
-
-      - name: Pull & restart stack on remote
+      - name: SSH & Deploy
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.PL_SSH_USER }}@${{ secrets.PL_SSH_HOST }} << 'EOF'
             cd ~/wedding-event-management/Provinces-Locations
-            docker-compose pull
-            docker-compose up -d
+
+            # Instala Docker Compose plugin v2 si no existe
+            if ! docker compose version > /dev/null 2>&1; then
+              sudo mkdir -p /usr/lib/docker/cli-plugins
+              sudo curl -SL https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-linux-x86_64 \
+                -o /usr/lib/docker/cli-plugins/docker-compose
+              sudo chmod +x /usr/lib/docker/cli-plugins/docker-compose
+            fi
+
+            # Pull & recreate using Compose v2
+            docker compose pull
+            docker compose up -d
           EOF
