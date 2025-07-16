@@ -41,7 +41,7 @@ Provinces-Locations/
 bash
 Copiar
 Editar
-git clone https://github.com/your-username/Provinces-Locations.git
+git clone https://github.com/keylet/Provinces-Locations.git
 cd Provinces-Locations
 
 # Create and edit .env file:

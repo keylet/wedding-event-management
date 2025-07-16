@@ -72,7 +72,7 @@ Currently, two core services are live:
 ### 1️⃣ Clone the Repository
 
 \`\`\`bash
-git clone https://github.com/your-username/wedding-event-management.git
+git clone https://github.com/keylet/wedding-event-management.git
 cd wedding-event-management
 \`\`\`
 
@@ -160,7 +160,3 @@ Built with Spring Boot and PostgreSQL, each service is modular and can scale sep
 
 ---
 
-## 👤 Author
-
-Developed and maintained by [Your Name].
-EOF
